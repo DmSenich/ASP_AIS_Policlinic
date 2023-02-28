@@ -23,5 +23,13 @@ namespace ASP_AIS_Policlinic.Models
         [ForeignKey("DiseaseTypeId")]
         [DisplayName("Тип заболевания")]
         public DiseaseType? DiseaseType { get; set; }
+
+        [ForeignKey("Visiting")]
+        [DisplayName("Визит")]
+        public int? VisitingId { get; set; }
+
+        [ForeignKey("VisitingId")]
+        [DisplayName("Визит")]
+        public Visiting? Visiting { get; set; }
     }
 }

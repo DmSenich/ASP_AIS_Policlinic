@@ -39,11 +39,17 @@ namespace ASP_AIS_Policlinic.Models
         public string House { get; set; }
 
         [DisplayName("Квартира")]
-        public int Apartment { get; set; }
+        public int? Apartment { get; set; }
 
         [Required(ErrorMessage = "Введите дату рождения")]
         [DataType(DataType.Date)]
         [DisplayName("Дата рождения")]
         public DateTime DateBirth { get; set; }
+
+        public ICollection<Visiting> Visitings { get; set; }
+        public Patient()
+        {
+            Visitings = new List<Visiting>();
+        }
     }
 }

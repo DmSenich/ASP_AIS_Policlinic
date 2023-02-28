@@ -13,5 +13,12 @@ namespace ASP_AIS_Policlinic.Models
         [Required(ErrorMessage = "Введите название диагноза")]
         [DisplayName("Тип заболевания")]
         public string NameDisease { get; set; }
+
+        public ICollection<Disease> Diseases { get; set; }
+
+        public DiseaseType()
+        {
+            Diseases = new List<Disease>();
+        }
     }
 }

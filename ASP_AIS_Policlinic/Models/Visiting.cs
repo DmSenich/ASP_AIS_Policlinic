@@ -33,5 +33,12 @@ namespace ASP_AIS_Policlinic.Models
         [DisplayName("Дата визита")]
         public DateTime DateVisiting { get; set; }
 
+        public ICollection<Disease> Diseases { get; set; }
+
+        public Visiting()
+        {
+            Diseases = new List<Disease>();
+        }
+
     }
 }

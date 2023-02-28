@@ -34,7 +34,7 @@ namespace ASP_AIS_Policlinic.Controllers
             }
 
             var disease = await _context.Diseases
-                .Include(d => d.DiseaseType)
+                .Include(d => d.DiseaseType).Include(d => d.Visiting)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (disease == null)
             {
@@ -48,6 +48,7 @@ namespace ASP_AIS_Policlinic.Controllers
         public IActionResult Create()
         {
             ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease");
+            ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id");
             return View();
         }
 
@@ -65,6 +66,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
+            ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
             return View(disease);
         }
 
@@ -82,6 +84,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
             ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
+            ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
             return View(disease);
         }
 
@@ -118,6 +121,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
+            ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
             return View(disease);
         }
 
@@ -130,7 +134,7 @@ namespace ASP_AIS_Policlinic.Controllers
             }
 
             var disease = await _context.Diseases
-                .Include(d => d.DiseaseType)
+                .Include(d => d.DiseaseType).Include(d => d.Visiting)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (disease == null)
             {
