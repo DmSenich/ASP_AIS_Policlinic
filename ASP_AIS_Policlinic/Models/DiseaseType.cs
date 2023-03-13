@@ -14,7 +14,7 @@ namespace ASP_AIS_Policlinic.Models
         [DisplayName("Тип заболевания")]
         public string NameDisease { get; set; }
 
-        public ICollection<Disease> Diseases { get; set; }
+        public ICollection<Disease>? Diseases { get; set; }
 
         public DiseaseType()
         {

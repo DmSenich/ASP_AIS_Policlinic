@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ASP_AIS_Policlinic.Models
 {
@@ -31,11 +32,14 @@ namespace ASP_AIS_Policlinic.Models
         public string? PathPhoto { get; set; }
 
         public ICollection<Specialty> Specialties { get; set; }
-        public ICollection<Visiting> Visitings { get; set; }
+        public ICollection<Visiting>? Visitings { get; set; }
         public Doctor()
         {
             Visitings = new List<Visiting>();
             Specialties = new List<Specialty>();
         }
+
+        [NotMapped]
+        public bool? toRecordDiagnosis { get; set; }
     }
 }

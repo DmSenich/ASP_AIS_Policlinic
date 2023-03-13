@@ -43,9 +43,13 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Patients/Create
-        public IActionResult Create()
+        public IActionResult Create(bool? fromRecordDiagnosis)
         {
-            return View();
+                if (fromRecordDiagnosis == true)
+                    ViewBag.toRecordDiagnosis = true;
+                else
+                    ViewBag.toRecordDiagnosis = false;
+                return View();      
         }
 
         // POST: Patients/Create
@@ -53,13 +57,16 @@ namespace ASP_AIS_Policlinic.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("LastName,FirstName,Patronymic,Area,City,House,Apartment,DateBirth")] Patient patient)
+        public async Task<IActionResult> Create([Bind("LastName,FirstName,Patronymic,Area,City,House,Apartment,DateBirth,toRecordDiagnosis")] Patient patient)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(patient);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if(patient.toRecordDiagnosis == true)
+                    return RedirectToAction("Index", "RecordDiagnosis");
+                else
+                    return RedirectToAction(nameof(Index));
             }
             return View(patient);
         }

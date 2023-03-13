@@ -1,19 +1,22 @@
-﻿@model IEnumerable<ASP_AIS_Policlinic.Models.Doctor>
-
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model IEnumerable<ASP_AIS_Policlinic.Models.Doctor>
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
+<h1>Выбор врача</h1>
+<div class="form-group">
+    <a asp-controller="Doctors" asp-action="Create" asp-route-fromRecordDiagnosis="true"
+    class="btn btn-info">Создать нового</a>
+</div>
+<table class="table table-bordered table-hover">
+     <tr>
+        <th>
                 @Html.DisplayNameFor(model => model.LastName)
             </th>
             <th>
@@ -26,15 +29,9 @@
                 @Html.DisplayNameFor(model => model.WorkExperience)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Specialties)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.PathPhoto)
             </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
+ </tr>
 @foreach (var item in Model) {
         <tr>
             <td>
@@ -49,9 +46,6 @@
             <td>
                 @Html.DisplayFor(modelItem => item.WorkExperience)
             </td>
-            <th>
-                @Html.DisplayFor(modelItem => item.Specialties)
-            </th>
             <td>
                 @Html.DisplayFor(modelItem => item.PathPhoto)
             </td>
@@ -60,7 +54,17 @@
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
+            <td>
+                 @using (Html.BeginForm())
+                {
+                <div asp-action="ChooseDate">
+                    <input type="hidden" name="DoctorId" value="@item.Id"/>
+                    <input type="hidden" name="PatientId" value="@ViewBag.PatientId"/>
+                    <input type="submit" value="Выбрать" class="btn btn-primary"/>
+                </div>
+                }
+            </td>
         </tr>
-}
-    </tbody>
+
+ }
 </table>

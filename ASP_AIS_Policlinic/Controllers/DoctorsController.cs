@@ -39,24 +39,44 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
 
+            ViewBag.Specialties = _context.Specialties.ToList();
+
+
             return View(doctor);
         }
 
         // GET: Doctors/Create
         public IActionResult Create()
         {
+            ViewBag.Specialties = _context.Specialties.ToList();
             return View();
         }
-
+        public IActionResult Create(bool? fromRecordDiagnosis)
+        {
+            if (fromRecordDiagnosis == true)
+                ViewBag.toRecordDiagnosis = true;
+            else
+                ViewBag.toRecordDiagnosis = false;
+            return View();
+        }
         // POST: Doctors/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("LastName,FirstName,Patronymic,WorkExperience,PathPhoto")] Doctor doctor)
+        public async Task<IActionResult> Create(Doctor doctor, int[] selectedSpecialties)
         {
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && selectedSpecialties != null)
             {
+                foreach(var sp in _context.Specialties.Where(sp0 => selectedSpecialties.Contains(sp0.Id)))
+                {
+                    doctor.Specialties.Add(sp);
+                }
+                if (doctor.toRecordDiagnosis == true)
+                    return RedirectToAction("ChooseDoctor", "RecordDiagnosis");
+                else
+                    return RedirectToAction(nameof(Index));
+
                 _context.Add(doctor);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -77,6 +97,7 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Specialties = _context.Specialties.ToList();
             return View(doctor);
         }
 
@@ -85,18 +106,27 @@ namespace ASP_AIS_Policlinic.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("LastName,FirstName,Patronymic,WorkExperience,PathPhoto")] Doctor doctor)
+        public async Task<IActionResult> Edit(int id, Doctor doctor, int[] selectedSpecialties)
         {
             if (id != doctor.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && selectedSpecialties != null)
             {
                 try
                 {
-                    _context.Update(doctor);
+                    
+                    //_context.Update(doctor);
+                    Doctor newDoc = await _context.Doctors.FindAsync(id);
+                    newDoc.Specialties.Clear();
+                    foreach(var sp in _context.Specialties)
+                    {
+                        if(selectedSpecialties.Contains(sp.Id))
+                            newDoc.Specialties.Add(sp);
+                    }
+                    _context.Update(newDoc);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

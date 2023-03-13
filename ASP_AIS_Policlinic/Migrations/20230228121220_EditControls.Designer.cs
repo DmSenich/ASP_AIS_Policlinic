@@ -4,6 +4,7 @@ using ASP_AIS_Policlinic.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASP_AIS_Policlinic.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230228121220_EditControls")]
+    partial class EditControls
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,7 +49,7 @@ namespace ASP_AIS_Policlinic.Migrations
 
                     b.HasIndex("VisitingId");
 
-                    b.ToTable("Diseases", (string)null);
+                    b.ToTable("Diseases");
                 });
 
             modelBuilder.Entity("ASP_AIS_Policlinic.Models.DiseaseType", b =>
@@ -65,7 +67,7 @@ namespace ASP_AIS_Policlinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DiseaseTypes", (string)null);
+                    b.ToTable("DiseaseTypes");
                 });
 
             modelBuilder.Entity("ASP_AIS_Policlinic.Models.Doctor", b =>
@@ -98,7 +100,7 @@ namespace ASP_AIS_Policlinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Doctors", (string)null);
+                    b.ToTable("Doctors");
                 });
 
             modelBuilder.Entity("ASP_AIS_Policlinic.Models.Patient", b =>
@@ -146,7 +148,7 @@ namespace ASP_AIS_Policlinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Patients", (string)null);
+                    b.ToTable("Patients");
                 });
 
             modelBuilder.Entity("ASP_AIS_Policlinic.Models.Specialty", b =>
@@ -164,7 +166,7 @@ namespace ASP_AIS_Policlinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Specialties", (string)null);
+                    b.ToTable("Specialties");
                 });
 
             modelBuilder.Entity("ASP_AIS_Policlinic.Models.Visiting", b =>
@@ -190,7 +192,7 @@ namespace ASP_AIS_Policlinic.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Visitings", (string)null);
+                    b.ToTable("Visitings");
                 });
 
             modelBuilder.Entity("DoctorSpecialty", b =>
@@ -205,7 +207,7 @@ namespace ASP_AIS_Policlinic.Migrations
 
                     b.HasIndex("SpecialtiesId");
 
-                    b.ToTable("DoctorSpecialty", (string)null);
+                    b.ToTable("DoctorSpecialty");
                 });
 
             modelBuilder.Entity("ASP_AIS_Policlinic.Models.Disease", b =>

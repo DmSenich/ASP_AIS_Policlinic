@@ -26,7 +26,7 @@ namespace ASP_AIS_Policlinic.Models
 
         [ForeignKey("Visiting")]
         [DisplayName("Визит")]
-        public int? VisitingId { get; set; }
+        public int VisitingId { get; set; }
 
         [ForeignKey("VisitingId")]
         [DisplayName("Визит")]

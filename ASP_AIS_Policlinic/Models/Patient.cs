@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ASP_AIS_Policlinic.Models
 {
@@ -46,10 +47,13 @@ namespace ASP_AIS_Policlinic.Models
         [DisplayName("Дата рождения")]
         public DateTime DateBirth { get; set; }
 
-        public ICollection<Visiting> Visitings { get; set; }
+        public ICollection<Visiting>? Visitings { get; set; }
         public Patient()
         {
             Visitings = new List<Visiting>();
         }
+
+        [NotMapped]
+        public bool? toRecordDiagnosis { get; set; }
     }
 }
