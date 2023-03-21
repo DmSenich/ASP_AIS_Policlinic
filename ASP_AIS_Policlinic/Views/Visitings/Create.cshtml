@@ -26,6 +26,7 @@
                 <input asp-for="DateVisiting" class="form-control" />
                 <span asp-validation-for="DateVisiting" class="text-danger"></span>
             </div>
+            <input type="hidden" asp-for="toRecordDiagnosis" value="@ViewBag.toRecordDiagnosis"/>
             <div class="form-group">
                 <input type="submit" value="Создать" class="btn btn-primary" />
             </div>

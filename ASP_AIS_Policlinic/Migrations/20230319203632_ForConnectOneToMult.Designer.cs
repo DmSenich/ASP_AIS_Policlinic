@@ -4,6 +4,7 @@ using ASP_AIS_Policlinic.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASP_AIS_Policlinic.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230319203632_ForConnectOneToMult")]
+    partial class ForConnectOneToMult
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,7 +37,7 @@ namespace ASP_AIS_Policlinic.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("DiseaseTypeId")
+                    b.Property<int>("DiseaseTypeId")
                         .HasColumnType("int");
 
                     b.Property<int?>("VisitingId")
@@ -212,7 +214,9 @@ namespace ASP_AIS_Policlinic.Migrations
                 {
                     b.HasOne("ASP_AIS_Policlinic.Models.DiseaseType", "DiseaseType")
                         .WithMany("Diseases")
-                        .HasForeignKey("DiseaseTypeId");
+                        .HasForeignKey("DiseaseTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ASP_AIS_Policlinic.Models.Visiting", "Visiting")
                         .WithMany("Diseases")

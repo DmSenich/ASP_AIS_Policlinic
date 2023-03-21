@@ -1,0 +1,63 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model IEnumerable<ASP_AIS_Policlinic.Models.Visiting>
+@{
+    ViewData["Title"] = "ChooseDate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Создание визита</h1>
+@using (Html.BeginForm("ChooseDate", "RecordDiagnosis", FormMethod.Post)){
+<div>
+    @*<a asp-controller="Visitings" asp-action="Create" asp-route-fromRecordDiagnosis="true"
+    class="btn btn-info">Создать нового</a>*@
+    <input type="hidden" name="PatientId" value="@ViewBag.PatientId"/>
+    <input type="hidden" name="DoctorId" value="@ViewBag.DoctorId"/> 
+        <input type="date" name="VisitingDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control"/>
+    <input type="submit" value="Выбрать" class="btn btn-primary"/>
+</div>
+}
+<table class="table table-bordered table-hover">
+     <tr>
+        @*<th>
+                @Html.DisplayNameFor(model => model.Doctor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Patient)
+            </th>*@
+            <th>
+                @Html.DisplayNameFor(model => model.DateVisiting)
+            </th>
+ </tr>
+@foreach (var item in Model) {
+        <tr>
+            @*<td>
+                @Html.DisplayFor(modelItem => String.Concat(item.Doctor.FirstName," ", item.Doctor.LastName))
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => String.Concat(item.Patient.FirstName, " ", item.Patient.LastName))
+            </td>*@
+            @if(item.PatientId == ViewBag.PatientId && item.DoctorId == ViewBag.DoctorId)
+            {
+            <td>
+                @Html.DisplayFor(modelItem => item.DateVisiting)
+            </td>
+            @*<td>
+                 @using (Html.BeginForm("ChooseDate", "RecordDiagnosis", FormMethod.Post))
+                {
+                <div >
+                    <input type="hidden" name="PatientId" value="@ViewBag.PatientId"/>
+                    <input type="hidden" name="DoctorId" value="@ViewBag.DoctorId"/>  
+                    <input type="hidden" name="VisitingId" value="@item.Id"/>
+                    <input type="submit" value="Выбрать" class="btn btn-primary"/>
+                </div>
+                }
+            </td>*@
+            }
+        </tr>
+
+ }
+</table>

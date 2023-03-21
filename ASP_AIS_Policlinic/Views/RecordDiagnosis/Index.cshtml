@@ -68,7 +68,7 @@
                 @Html.DisplayFor(modelItem => item.DateBirth)
             </td>
             <td>
-                 @using (Html.BeginForm())
+                 @using (Html.BeginForm("Index","RecordDiagnosis", FormMethod.Post))
                 {
                 <div>
                     <input type="hidden" name="PatientId" value="@item.Id"/>

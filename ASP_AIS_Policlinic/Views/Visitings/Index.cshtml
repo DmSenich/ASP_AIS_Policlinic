@@ -30,9 +30,11 @@
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Doctor.FirstName)
+                    @Html.DisplayFor(modelItem => item.Doctor.LastName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Patient.Area)
+                @Html.DisplayFor(modelItem => item.Patient.FirstName)
+                    @Html.DisplayFor(modelItem => item.Patient.LastName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.DateVisiting)

@@ -17,8 +17,8 @@ namespace ASP_AIS_Policlinic.Models
 
         [ForeignKey("DiseaseType")]
         [DisplayName("Тип заболевания")]
-        [Required(ErrorMessage = "Выберите диагноз")]
-        public int DiseaseTypeId { get; set; }
+        //[Required(ErrorMessage = "Выберите диагноз")]
+        public int? DiseaseTypeId { get; set; }
 
         [ForeignKey("DiseaseTypeId")]
         [DisplayName("Тип заболевания")]
@@ -26,7 +26,7 @@ namespace ASP_AIS_Policlinic.Models
 
         [ForeignKey("Visiting")]
         [DisplayName("Визит")]
-        public int VisitingId { get; set; }
+        public int? VisitingId { get; set; }
 
         [ForeignKey("VisitingId")]
         [DisplayName("Визит")]

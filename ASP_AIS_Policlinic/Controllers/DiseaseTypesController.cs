@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
+using ASP_AIS_Policlinic.Models.ViewModels;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -32,14 +33,34 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
 
-            var diseaseType = await _context.DiseaseTypes
+            var diseaseType = await _context.DiseaseTypes.Include(dt => dt.Diseases)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (diseaseType == null)
             {
                 return NotFound();
             }
+            DiseaseTypeDetailsViewModel viewModel = new DiseaseTypeDetailsViewModel();
+            viewModel.DiseaseType = diseaseType;
+            viewModel.Diseases = _context.Diseases.Include(d => d.DiseaseType).Where(d => d.DiseaseTypeId == id);
 
-            return View(diseaseType);
+            return View(viewModel);
+        }
+
+        public IActionResult AddDiseaseToDiseaseType(int id)
+        {
+            ViewBag.DiseaseTypeId = id;
+            return View(_context.Diseases.Include(d => d.DiseaseType).Where(d => d.DiseaseTypeId == null));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddDiseaseToDiseaseType(int diseaseTypeId, int diseaseId)
+        {
+            Disease disease = _context.Diseases.Include(d => d.DiseaseType).FirstOrDefault(d => d.Id == diseaseId);
+            disease.DiseaseTypeId = diseaseTypeId;
+            disease.DiseaseType = _context.DiseaseTypes.FirstOrDefault(dt => dt.Id == diseaseTypeId);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = diseaseTypeId });
         }
 
         // GET: DiseaseTypes/Create

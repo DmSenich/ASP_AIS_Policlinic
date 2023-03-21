@@ -57,7 +57,7 @@ namespace ASP_AIS_Policlinic.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Description,DiseaseTypeId")] Disease disease)
+        public async Task<IActionResult> Create([Bind("Description")] Disease disease)
         {
             if (ModelState.IsValid)
             {
@@ -65,8 +65,8 @@ namespace ASP_AIS_Policlinic.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
-            ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
+            //ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
+            //ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
             return View(disease);
         }
 

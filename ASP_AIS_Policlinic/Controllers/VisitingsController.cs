@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
+using System.Numerics;
+using ASP_AIS_Policlinic.Models.ViewModels;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -41,30 +43,57 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return NotFound();
             }
+            VisitingDetailsViewModel viewModel = new VisitingDetailsViewModel();
+            viewModel.Visiting = visiting;
+            viewModel.Diseases = _context.Diseases.Include(d=>d.DiseaseType).Where(d => d.VisitingId == id);
+            return View(viewModel);
+        }
 
-            return View(visiting);
+        public IActionResult AddDiseaseToVisiting(int id)
+        {
+            ViewBag.VisitingId = id;
+            return View(_context.Diseases.Where(v => v.VisitingId == null));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddDiseaseToVisiting(int visitingId, int diseaseId)
+        {
+            Disease disease = _context.Diseases.Find(diseaseId);
+            disease.VisitingId = visitingId;
+            disease.Visiting = _context.Visitings.Find(visitingId);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = visitingId });
         }
 
         // GET: Visitings/Create
-        public IActionResult Create()
+        public IActionResult Create(bool? fromRecordDiagnosis)
         {
             ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "FirstName");
             ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "FirstName");
+            if (fromRecordDiagnosis == true)
+                ViewBag.toRecordDiagnosis = true;
+            else
+                ViewBag.toRecordDiagnosis = false;
             return View();
         }
-
         // POST: Visitings/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DoctorId,PatientId,DateVisiting")] Visiting visiting)
+        public async Task<IActionResult> Create([Bind("DoctorId,PatientId,DateVisiting,toRecordDiagnosis")] Visiting visiting)
         {
             if (ModelState.IsValid)
             {
+ 
                 _context.Add(visiting);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                if (visiting.toRecordDiagnosis == true)
+                    return RedirectToAction("ChooseDate", "RecordDiagnosis");
+                else
+                    return RedirectToAction(nameof(Index));
             }
             ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "FirstName", visiting.DoctorId);
             ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "FirstName", visiting.PatientId);

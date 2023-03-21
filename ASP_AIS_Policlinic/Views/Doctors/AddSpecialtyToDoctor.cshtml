@@ -1,0 +1,49 @@
+﻿@model IEnumerable<ASP_AIS_Policlinic.Models.Specialty>
+
+@{
+    ViewData["Title"] = "AddSpecialtyToDoctor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>AddSpecialtyToDoctor</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.NameSpecialty)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NameSpecialty)
+                </td>
+                <td>
+                    @if (item.Doctors.Count(d => d.Id == ViewBag.DoctorId) != 0)
+                    {
+                        <form method="post">
+                            <input type="hidden" name="doctorId" value="@ViewBag.DoctorId">
+                            <input type="hidden" name="specialtyId" value="@item.Id">
+                            <input type="submit" value="Убрать" class="btn btn-success">
+                        </form>
+                    }
+                    else
+                    {
+
+                        <form method="post">
+                            <input type="hidden" name="doctorId" value="@ViewBag.DoctorId">
+                            <input type="hidden" name="specialtyId" value="@item.Id">
+                            <input type="submit" value="Выбрать" class="btn btn-success">
+                        </form>
+                        
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

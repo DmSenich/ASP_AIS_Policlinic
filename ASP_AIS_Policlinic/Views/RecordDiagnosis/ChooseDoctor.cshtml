@@ -5,7 +5,7 @@
 }
 @model IEnumerable<ASP_AIS_Policlinic.Models.Doctor>
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "ChooseDoctor";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -50,16 +50,11 @@
                 @Html.DisplayFor(modelItem => item.PathPhoto)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-            <td>
-                 @using (Html.BeginForm())
+                 @using (Html.BeginForm("ChooseDoctor", "RecordDiagnosis", FormMethod.Post))
                 {
-                <div asp-action="ChooseDate">
-                    <input type="hidden" name="DoctorId" value="@item.Id"/>
+                <div>
                     <input type="hidden" name="PatientId" value="@ViewBag.PatientId"/>
+                    <input type="hidden" name="DoctorId" value="@item.Id"/>                    
                     <input type="submit" value="Выбрать" class="btn btn-primary"/>
                 </div>
                 }

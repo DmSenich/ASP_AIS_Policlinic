@@ -1,4 +1,4 @@
-﻿@model ASP_AIS_Policlinic.Models.Visiting
+﻿@model ASP_AIS_Policlinic.Models.ViewModels.VisitingDetailsViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -8,30 +8,74 @@
 <h1>Подробности</h1>
 
 <div>
-    <h4>Встреча</h4>
+    <h4>Сведения о встрече</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Doctor)
+            @Html.DisplayNameFor(model => model.Visiting.DateVisiting)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Doctor.FirstName)
+            @Html.DisplayFor(model => model.Visiting.DateVisiting)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Patient)
+            @Html.DisplayNameFor(model => model.Visiting.Doctor.LastName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Patient.Area)
+            @Html.DisplayFor(model => model.Visiting.Doctor.LastName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateVisiting)
+            @Html.DisplayNameFor(model => model.Visiting.Patient.LastName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateVisiting)
+            @Html.DisplayFor(model => model.Visiting.Patient.LastName)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Редактировать</a> |
+    <a asp-action="Edit" asp-route-id="@Model?.Visiting.Id">Редактировать</a> |
     <a asp-action="Index">Вернуться к списку</a>
 </div>
+
+<div class="container p-0">
+    <div class="row pb-3">
+        <div class="col-md-9">
+            <h4>Поставленные диагнозы</h4>
+        </div>
+        <div class="col-md-3 text-end">
+            <a asp-action="AddDiseaseToVisiting" asp-route-id="@Model.Visiting.Id" class="btn btn-info">Добавить ко встрече</a>
+        </div>
+
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Diseases.First().DiseaseType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Diseases.First().Description)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Diseases)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DiseaseType.NameDisease)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    <a asp-controller="Diseases" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-controller="Diseases" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-controller="Diseases" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

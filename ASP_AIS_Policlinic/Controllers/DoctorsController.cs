@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
+using ASP_AIS_Policlinic.Models.ViewModels;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -21,7 +22,8 @@ namespace ASP_AIS_Policlinic.Controllers
         // GET: Doctors
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Doctors.ToListAsync());
+            var appDBContext = _context.Doctors.Include(d => d.Specialties);
+              return View(await appDBContext.ToListAsync());
         }
 
         // GET: Doctors/Details/5
@@ -32,27 +34,51 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
 
-            var doctor = await _context.Doctors
+            var doctor = await _context.Doctors.Include(d=>d.Specialties)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (doctor == null)
             {
                 return NotFound();
             }
 
-            ViewBag.Specialties = _context.Specialties.ToList();
+            DoctorDetailsViewModel viewModel = new DoctorDetailsViewModel();
+            viewModel.Doctor = doctor;
+            viewModel.Specialties = _context.Specialties.Where(sp => sp.Doctors.FirstOrDefault(d => d.Id == id).Id == id);
+            return View(viewModel);
+        }
 
+        public IActionResult AddSpecialtyToDoctor(int id)
+        {
+            ViewBag.DoctorId = id;
+            return View(_context.Specialties.Include(sp => sp.Doctors));
+        }
 
-            return View(doctor);
+        [HttpPost]
+        public async Task<IActionResult> AddSpecialtyToDoctor(int doctorId, int specialtyId)
+        {
+            Specialty specialty = _context.Specialties.Include(sp => sp.Doctors).FirstOrDefault(sp => sp.Id == specialtyId);
+            Doctor doctor = _context.Doctors.Include(d => d.Specialties).FirstOrDefault(d => d.Id == doctorId);
+
+            if (specialty.Doctors.Contains(doctor))
+            {
+                specialty.Doctors.Remove(doctor);
+                doctor.Specialties.Remove(specialty);
+            }
+            else
+            {
+                specialty.Doctors.Add(doctor);
+                doctor.Specialties.Add(specialty);
+            }
+            
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = doctorId });
         }
 
         // GET: Doctors/Create
-        public IActionResult Create()
-        {
-            ViewBag.Specialties = _context.Specialties.ToList();
-            return View();
-        }
         public IActionResult Create(bool? fromRecordDiagnosis)
         {
+            ViewBag.Specialties = _context.Specialties.ToList();
             if (fromRecordDiagnosis == true)
                 ViewBag.toRecordDiagnosis = true;
             else
@@ -72,14 +98,14 @@ namespace ASP_AIS_Policlinic.Controllers
                 {
                     doctor.Specialties.Add(sp);
                 }
+
+                _context.Add(doctor);
+                await _context.SaveChangesAsync();
+
                 if (doctor.toRecordDiagnosis == true)
                     return RedirectToAction("ChooseDoctor", "RecordDiagnosis");
                 else
                     return RedirectToAction(nameof(Index));
-
-                _context.Add(doctor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
             }
             return View(doctor);
         }

@@ -1,4 +1,4 @@
-﻿@model ASP_AIS_Policlinic.Models.Doctor
+﻿@model ASP_AIS_Policlinic.Models.ViewModels.DoctorDetailsViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -12,47 +12,75 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastName)
+            @Html.DisplayNameFor(model => model.Doctor.LastName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastName)
+            @Html.DisplayFor(model => model.Doctor.LastName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FirstName)
+            @Html.DisplayNameFor(model => model.Doctor.FirstName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FirstName)
+            @Html.DisplayFor(model => model.Doctor.FirstName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Patronymic)
+            @Html.DisplayNameFor(model => model.Doctor.Patronymic)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Patronymic)
+            @Html.DisplayFor(model => model.Doctor.Patronymic)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.WorkExperience)
+            @Html.DisplayNameFor(model => model.Doctor.WorkExperience)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.WorkExperience)
+            @Html.DisplayFor(model => model.Doctor.WorkExperience)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PathPhoto)
+            @Html.DisplayNameFor(model => model.Doctor.PathPhoto)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PathPhoto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Specialties)
-        </dt>
-        <dd class = "col-sm-10">
-        @*@foreach(Specialty sp in Model.Specialties)
-        {
-           @sp.NameSpecialty
-        }*@
+            @Html.DisplayFor(model => model.Doctor.PathPhoto)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model?.Doctor.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+<div class="container p-0">
+    <div class="row pb-3">
+        <div class="col-md-9">
+            <h4>Специальности</h4>
+        </div>
+        <div class="col-md-3 text-end">
+            <a asp-action="AddSpecialtyToDoctor" asp-route-id="@Model.Doctor.Id" class="btn btn-info">Изменить</a>
+        </div>
+
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Specialties.First().NameSpecialty)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Specialties)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NameSpecialty)
+                </td>
+                <td>
+                    <a asp-controller="Specialties" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-controller="Specialties" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-controller="Specialties" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

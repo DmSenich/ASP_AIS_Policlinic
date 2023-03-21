@@ -40,5 +40,7 @@ namespace ASP_AIS_Policlinic.Models
             Diseases = new List<Disease>();
         }
 
+        [NotMapped]
+        public bool? toRecordDiagnosis { get; set; }
     }
 }

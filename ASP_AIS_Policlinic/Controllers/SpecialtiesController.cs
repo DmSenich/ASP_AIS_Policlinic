@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
+using ASP_AIS_Policlinic.Models.ViewModels;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -21,7 +22,8 @@ namespace ASP_AIS_Policlinic.Controllers
         // GET: Specialties
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Specialties.ToListAsync());
+            var appDBContext = _context.Specialties.Include(sp => sp.Doctors);
+            return View(await appDBContext.ToListAsync());
         }
 
         // GET: Specialties/Details/5
@@ -32,14 +34,45 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
 
-            var specialty = await _context.Specialties
+            var specialty = await _context.Specialties.Include(sp => sp.Doctors)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (specialty == null)
             {
                 return NotFound();
             }
+            SpecialtyDetailsViewModel viewModel = new SpecialtyDetailsViewModel();
+            viewModel.Specialty = specialty;
+            viewModel.Doctors = _context.Doctors.Where(d => d.Specialties.FirstOrDefault(sp => sp.Id == id).Id == id);
 
-            return View(specialty);
+            return View(viewModel);
+        }
+
+        public IActionResult AddDoctorToSpecialty(int id)
+        {
+            ViewBag.SpecialtyId = id;
+            return View(_context.Doctors.Include(d => d.Specialties));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddDoctorToSpecialty(int doctorId, int specialtyId)
+        {
+            Specialty specialty = _context.Specialties.Include(sp => sp.Doctors).FirstOrDefault(sp => sp.Id == specialtyId);
+            Doctor doctor = _context.Doctors.Include(d => d.Specialties).FirstOrDefault(d => d.Id == doctorId);
+
+            if (doctor.Specialties.Contains(specialty))
+            {
+                specialty.Doctors.Remove(doctor);
+                doctor.Specialties.Remove(specialty);
+            }
+            else
+            {
+                specialty.Doctors.Add(doctor);
+                doctor.Specialties.Add(specialty);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = specialtyId });
         }
 
         // GET: Specialties/Create
