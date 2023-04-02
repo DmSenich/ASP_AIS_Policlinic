@@ -31,7 +31,8 @@ namespace ASP_AIS_Policlinic.Models
         [DisplayName("Фото")]
         public string? PathPhoto { get; set; }
 
-        public ICollection<Specialty> Specialties { get; set; }
+        [DisplayName("Специальности")]
+        public ICollection<Specialty>? Specialties { get; set; }
         public ICollection<Visiting>? Visitings { get; set; }
         public Doctor()
         {

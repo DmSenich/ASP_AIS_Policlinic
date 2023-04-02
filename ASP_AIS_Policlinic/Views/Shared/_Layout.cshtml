@@ -20,12 +20,29 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="RecordDiagnosis" asp-action="Index">Записаться к врачу</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="@Url.Action("Index", "Doctors")" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Контроллеры
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="@Url.Action("Index", "Doctors")">Врачи</a>
+                                <a class="dropdown-item" href="@Url.Action("Index", "Patients")">Пациенты</a>
+                                <a class="dropdown-item" href="@Url.Action("Index", "Diseases")">Диагнозы</a>
+                                <a class="dropdown-item" href="@Url.Action("Index", "DiseaseTypes")">Типы заболеваний</a>
+                                <a class="dropdown-item" href="@Url.Action("Index", "Specialties")">Специальности</a>
+                                <a class="dropdown-item" href="@Url.Action("Index", "Visitings")">Визиты</a>
+                                <!-- Добавьте другие элементы списка здесь -->
+                            </div>
                         </li>
                     </ul>
+                </div>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <partial name="_LoginPartial"></partial>
                 </div>
             </div>
         </nav>

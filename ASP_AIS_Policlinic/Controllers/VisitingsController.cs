@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
 using System.Numerics;
 using ASP_AIS_Policlinic.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
+    [Authorize]
     public class VisitingsController : Controller
     {
         private readonly AppDBContext _context;
@@ -52,7 +54,7 @@ namespace ASP_AIS_Policlinic.Controllers
         public IActionResult AddDiseaseToVisiting(int id)
         {
             ViewBag.VisitingId = id;
-            return View(_context.Diseases.Where(v => v.VisitingId == null));
+            return View(_context.Diseases.Include(d => d.DiseaseType).Where(v => v.VisitingId == null));
         }
 
         [HttpPost]

@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
 using ASP_AIS_Policlinic.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
+    [Authorize]
     public class DiseaseTypesController : Controller
     {
         private readonly AppDBContext _context;

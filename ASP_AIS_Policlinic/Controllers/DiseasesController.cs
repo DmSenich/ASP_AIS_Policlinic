@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
+    [Authorize]
     public class DiseasesController : Controller
     {
         private readonly AppDBContext _context;
@@ -21,7 +23,7 @@ namespace ASP_AIS_Policlinic.Controllers
         // GET: Diseases
         public async Task<IActionResult> Index()
         {
-            var appDBContext = _context.Diseases.Include(d => d.DiseaseType);
+            var appDBContext = _context.Diseases.Include(d => d.DiseaseType).Include(d => d.Visiting);
             return View(await appDBContext.ToListAsync());
         }
 

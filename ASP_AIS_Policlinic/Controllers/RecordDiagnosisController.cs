@@ -1,10 +1,12 @@
 ﻿using ASP_AIS_Policlinic.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
+    [Authorize]
     public class RecordDiagnosisController : Controller
     {
         private readonly AppDBContext _context;
