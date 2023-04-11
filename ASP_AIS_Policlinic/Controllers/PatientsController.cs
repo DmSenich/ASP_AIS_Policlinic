@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
 using Microsoft.AspNetCore.Authorization;
+using ASP_AIS_Policlinic.Areas.Identity.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -14,10 +16,12 @@ namespace ASP_AIS_Policlinic.Controllers
     public class PatientsController : Controller
     {
         private readonly AppDBContext _context;
+        private readonly UserManager<PoliclinicUser> _userManager;
 
-        public PatientsController(AppDBContext context)
+        public PatientsController(AppDBContext context, UserManager<PoliclinicUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Patients

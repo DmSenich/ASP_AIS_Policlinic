@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
 using ASP_AIS_Policlinic.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using ASP_AIS_Policlinic.Areas.Identity.Data;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -15,10 +17,12 @@ namespace ASP_AIS_Policlinic.Controllers
     public class DoctorsController : Controller
     {
         private readonly AppDBContext _context;
+        private readonly UserManager<PoliclinicUser> _userManager;
 
-        public DoctorsController(AppDBContext context)
+        public DoctorsController(AppDBContext context, UserManager<PoliclinicUser> userManaher)
         {
             _context = context;
+            _userManager = userManaher;
         }
 
         // GET: Doctors
@@ -49,8 +53,13 @@ namespace ASP_AIS_Policlinic.Controllers
             return View(viewModel);
         }
 
-        public IActionResult AddSpecialtyToDoctor(int id)
+        public async Task<IActionResult> AddSpecialtyToDoctor(int id)
         {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
+            }
             ViewBag.DoctorId = id;
             return View(_context.Specialties.Include(sp => sp.Doctors));
         }
@@ -58,6 +67,11 @@ namespace ASP_AIS_Policlinic.Controllers
         [HttpPost]
         public async Task<IActionResult> AddSpecialtyToDoctor(int doctorId, int specialtyId)
         {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
+            }
             Specialty specialty = _context.Specialties.Include(sp => sp.Doctors).FirstOrDefault(sp => sp.Id == specialtyId);
             Doctor doctor = _context.Doctors.Include(d => d.Specialties).FirstOrDefault(d => d.Id == doctorId);
 
@@ -78,8 +92,14 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Doctors/Create
-        public IActionResult Create(bool? fromRecordDiagnosis)
+        public async Task<IActionResult> Create(bool? fromRecordDiagnosis)
         {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
+            }
+
             ViewBag.Specialties = _context.Specialties.ToList();
             if (fromRecordDiagnosis == true)
                 ViewBag.toRecordDiagnosis = true;
@@ -118,6 +138,11 @@ namespace ASP_AIS_Policlinic.Controllers
             if (id == null || _context.Doctors == null)
             {
                 return NotFound();
+            }
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
             }
 
             var doctor = await _context.Doctors.FindAsync(id);
@@ -179,6 +204,11 @@ namespace ASP_AIS_Policlinic.Controllers
             if (id == null || _context.Doctors == null)
             {
                 return NotFound();
+            }
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!await _userManager.IsInRoleAsync(user, "admin"))
+            {
+                return new StatusCodeResult(403);
             }
 
             var doctor = await _context.Doctors

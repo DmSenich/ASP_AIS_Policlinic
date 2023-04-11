@@ -55,11 +55,21 @@
             <td>
                 @Html.DisplayFor(modelItem => item.PathPhoto)
             </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
+                @if (User.IsInRole("admin"))
+                {
+                    <td>
+                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                         <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                         <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                }
+                else
+                {
+                     <td>
+                         <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    </td>
+                }
+                
         </tr>
 }
     </tbody>

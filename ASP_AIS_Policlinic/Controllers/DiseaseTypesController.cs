@@ -8,17 +8,21 @@ using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
 using ASP_AIS_Policlinic.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using ASP_AIS_Policlinic.Areas.Identity.Data;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "coach, admin")]
     public class DiseaseTypesController : Controller
     {
         private readonly AppDBContext _context;
+        private readonly UserManager<PoliclinicUser> _userManager;
 
-        public DiseaseTypesController(AppDBContext context)
+        public DiseaseTypesController(AppDBContext context, UserManager<PoliclinicUser> userManaher)
         {
             _context = context;
+            _userManager = userManaher;
         }
 
         // GET: DiseaseTypes
@@ -48,8 +52,13 @@ namespace ASP_AIS_Policlinic.Controllers
             return View(viewModel);
         }
 
-        public IActionResult AddDiseaseToDiseaseType(int id)
+        public async Task<IActionResult> AddDiseaseToDiseaseType(int id)
         {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
+            }
             ViewBag.DiseaseTypeId = id;
             return View(_context.Diseases.Include(d => d.DiseaseType).Where(d => d.DiseaseTypeId == null));
         }
@@ -66,8 +75,13 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: DiseaseTypes/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
+            }
             return View();
         }
 
@@ -93,6 +107,11 @@ namespace ASP_AIS_Policlinic.Controllers
             if (id == null || _context.DiseaseTypes == null)
             {
                 return NotFound();
+            }
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
             }
 
             var diseaseType = await _context.DiseaseTypes.FindAsync(id);
@@ -144,6 +163,11 @@ namespace ASP_AIS_Policlinic.Controllers
             if (id == null || _context.DiseaseTypes == null)
             {
                 return NotFound();
+            }
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
             }
 
             var diseaseType = await _context.DiseaseTypes

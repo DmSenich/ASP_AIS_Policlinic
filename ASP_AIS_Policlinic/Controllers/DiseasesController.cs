@@ -7,17 +7,22 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ASP_AIS_Policlinic.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using ASP_AIS_Policlinic.Areas.Identity.Data;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
     [Authorize]
+
     public class DiseasesController : Controller
     {
         private readonly AppDBContext _context;
+        private readonly UserManager<PoliclinicUser> _userManager;
 
-        public DiseasesController(AppDBContext context)
+        public DiseasesController(AppDBContext context, UserManager<PoliclinicUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Diseases
@@ -47,8 +52,14 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Diseases/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if(!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
+            }
+
             ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease");
             ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id");
             return View();
@@ -78,6 +89,11 @@ namespace ASP_AIS_Policlinic.Controllers
             if (id == null || _context.Diseases == null)
             {
                 return NotFound();
+            }
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
             }
 
             var disease = await _context.Diseases.FindAsync(id);
@@ -133,6 +149,11 @@ namespace ASP_AIS_Policlinic.Controllers
             if (id == null || _context.Diseases == null)
             {
                 return NotFound();
+            }
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
             }
 
             var disease = await _context.Diseases
