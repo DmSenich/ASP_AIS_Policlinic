@@ -18,11 +18,13 @@ namespace ASP_AIS_Policlinic.Controllers
     {
         private readonly AppDBContext _context;
         private readonly UserManager<PoliclinicUser> _userManager;
+        private readonly IWebHostEnvironment _appEnvironment;
 
-        public DoctorsController(AppDBContext context, UserManager<PoliclinicUser> userManaher)
+        public DoctorsController(AppDBContext context, UserManager<PoliclinicUser> userManaher, IWebHostEnvironment appEnvironment)
         {
             _context = context;
             _userManager = userManaher;
+            _appEnvironment = appEnvironment;
         }
 
         // GET: Doctors
@@ -45,6 +47,16 @@ namespace ASP_AIS_Policlinic.Controllers
             if (doctor == null)
             {
                 return NotFound();
+            }
+            if (!String.IsNullOrEmpty(doctor.PathPhoto))
+            {
+                byte[] photodata = System.IO.File
+                    .ReadAllBytes(_appEnvironment.WebRootPath + doctor.PathPhoto);
+                ViewBag.Photodata = photodata;
+            }
+            else
+            {
+                ViewBag.Photodata = null;
             }
 
             DoctorDetailsViewModel viewModel = new DoctorDetailsViewModel();
@@ -112,13 +124,23 @@ namespace ASP_AIS_Policlinic.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Doctor doctor, int[] selectedSpecialties)
+        public async Task<IActionResult> Create(Doctor doctor, IFormFile upload, int[] selectedSpecialties)
         {
-            if (ModelState.IsValid && selectedSpecialties != null)
+            if (ModelState.IsValid /*&& selectedSpecialties != null*/)
             {
-                foreach(var sp in _context.Specialties.Where(sp0 => selectedSpecialties.Contains(sp0.Id)))
+                //foreach(var sp in _context.Specialties.Where(sp0 => selectedSpecialties.Contains(sp0.Id)))
+                //{
+                //    doctor.Specialties.Add(sp);
+                //}
+                if(upload != null)
                 {
-                    doctor.Specialties.Add(sp);
+                    string path = "\\Files\\" + upload.FileName;
+                    using(var fileStream = 
+                        new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
+                    {
+                        await upload.CopyToAsync(fileStream);
+                    }
+                    doctor.PathPhoto = path;
                 }
 
                 _context.Add(doctor);
@@ -150,6 +172,16 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return NotFound();
             }
+            if (!String.IsNullOrEmpty(doctor.PathPhoto))
+            {
+                byte[] photodata = System.IO.File.
+                    ReadAllBytes(_appEnvironment.WebRootPath + doctor.PathPhoto);
+                ViewBag.Photodata = photodata;
+            }
+            else
+            {
+                ViewBag.Photodata = null;
+            }
             ViewBag.Specialties = _context.Specialties.ToList();
             return View(doctor);
         }
@@ -159,27 +191,41 @@ namespace ASP_AIS_Policlinic.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Doctor doctor, int[] selectedSpecialties)
+        public async Task<IActionResult> Edit(int id, Doctor doctor, int[] selectedSpecialties, IFormFile? upload)
         {
             if (id != doctor.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid && selectedSpecialties != null)
+            if (ModelState.IsValid /*&& selectedSpecialties != null*/)
             {
+                if(upload != null)
+                {
+                    string path = "\\Files\\" + upload.FileName;
+                    using(var fileStream = 
+                        new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
+                    {
+                        await upload.CopyToAsync(fileStream);
+                    }
+                    if (!String.IsNullOrEmpty(doctor.PathPhoto))
+                    {
+                        System.IO.File.Delete(_appEnvironment.WebRootPath + doctor.PathPhoto);
+                    }
+                    doctor.PathPhoto = path;
+                }
+
                 try
                 {
-                    
-                    //_context.Update(doctor);
-                    Doctor newDoc = await _context.Doctors.FindAsync(id);
-                    newDoc.Specialties.Clear();
-                    foreach(var sp in _context.Specialties)
-                    {
-                        if(selectedSpecialties.Contains(sp.Id))
-                            newDoc.Specialties.Add(sp);
-                    }
-                    _context.Update(newDoc);
+
+                    //Doctor newDoc = await _context.Doctors.FindAsync(id);
+                    //newDoc.Specialties.Clear();
+                    //foreach(var sp in _context.Specialties)
+                    //{
+                    //    if(selectedSpecialties.Contains(sp.Id))
+                    //        newDoc.Specialties.Add(sp);
+                    //}
+                    _context.Update(doctor);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
