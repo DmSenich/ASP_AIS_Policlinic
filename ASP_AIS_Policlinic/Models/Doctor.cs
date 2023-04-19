@@ -42,5 +42,8 @@ namespace ASP_AIS_Policlinic.Models
 
         [NotMapped]
         public bool? toRecordDiagnosis { get; set; }
+
+        [NotMapped]
+        public bool? toProfile { get; set; }
     }
 }

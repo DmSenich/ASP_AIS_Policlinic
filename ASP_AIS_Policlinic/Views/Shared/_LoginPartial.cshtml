@@ -7,6 +7,30 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+        if (User.IsInRole("coach"))
+        {
+            <li class="nav-item">
+                @using (Html.BeginForm($"Details", "Doctors", FormMethod.Get))
+                {
+                    <div>
+                        <input type="hidden" name="id" value="@((await UserManager.GetUserAsync(User)).ModelId)">
+                        <input type="submit" value="Профиль" class="btn btn-success">
+                    </div>
+                }
+            </li>
+        }
+        if (User.IsInRole("guest"))
+        {
+            <li class="nav-item">
+                @using (Html.BeginForm($"Details", "Patients", FormMethod.Get))
+                {
+                    <div>
+                        <input type="hidden" name="id" value="@((await UserManager.GetUserAsync(User)).ModelId)">
+                        <input type="submit" value="Профиль" class="btn btn-success">
+                    </div>
+                }
+            </li>
+        }
     <li class="nav-item">
         <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
     </li>

@@ -54,7 +54,7 @@
                 <span asp-validation-for="DateBirth" class="text-danger"></span>
             </div>
             <input type="hidden" asp-for="toRecordDiagnosis" value="@ViewBag.toRecordDiagnosis"/>
-
+            <input type="hidden" asp-for="toProfile" value="@ViewBag.isProfile" />
             <div class="form-group">
                 <input type="submit" value="Создать" class="btn btn-primary" />
             </div>
