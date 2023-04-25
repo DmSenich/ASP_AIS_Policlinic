@@ -104,7 +104,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Doctors/Create
-        public async Task<IActionResult> Create(bool? fromRecordDiagnosis)
+        public async Task<IActionResult> Create(bool? fromRecordDiagnosis, bool? forProfile)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
@@ -117,6 +117,11 @@ namespace ASP_AIS_Policlinic.Controllers
                 ViewBag.toRecordDiagnosis = true;
             else
                 ViewBag.toRecordDiagnosis = false;
+
+            if (forProfile == true)
+                ViewBag.isProfile = true;
+            else
+                ViewBag.isProfile = false;
             return View();
         }
         // POST: Doctors/Create
@@ -148,6 +153,13 @@ namespace ASP_AIS_Policlinic.Controllers
 
                 if (doctor.toRecordDiagnosis == true)
                     return RedirectToAction("ChooseDoctor", "RecordDiagnosis");
+                else if (doctor.toProfile == true)
+                {
+                    var user = await _userManager.GetUserAsync(HttpContext.User);
+                    user.ModelId = doctor.Id;
+                    await _userManager.UpdateAsync(user);
+                    return RedirectToAction("Index", "Home");
+                }
                 else
                     return RedirectToAction(nameof(Index));
             }
