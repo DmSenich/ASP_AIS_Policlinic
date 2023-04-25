@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ASP_AIS_Policlinic.styles.css" asp-append-version="true" />
+    @using Microsoft.AspNetCore.Identity
+    @using ASP_AIS_Policlinic.Areas.Identity.Data
+    @inject UserManager<PoliclinicUser> UserManager
 </head>
 <body>
     <header>
@@ -24,6 +27,17 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="RecordDiagnosis" asp-action="Index">Записаться к врачу</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            @if (User.IsInRole("guest"))
+                            {
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ViewDiseases" asp-action="Index" asp-route-id="@((await UserManager.GetUserAsync(User)).ModelId)">История болезни</a>
+                            }
+                            else
+                            {
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ViewDiseases" asp-action="Index">История болезни</a>
+                            }
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="@Url.Action("Index", "Doctors")" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

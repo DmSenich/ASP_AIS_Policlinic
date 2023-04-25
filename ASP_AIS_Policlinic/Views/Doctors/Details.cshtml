@@ -1,9 +1,12 @@
 ﻿@model ASP_AIS_Policlinic.Models.ViewModels.DoctorDetailsViewModel
-
+@using Microsoft.AspNetCore.Identity
+@using ASP_AIS_Policlinic.Areas.Identity.Data
+@inject UserManager<PoliclinicUser> UserManager
 @{
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 
 <h1>Details</h1>
 
@@ -48,19 +51,26 @@
         </dd>
     </dl>
 </div>
+
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Doctor.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @if (User.IsInRole("admin") ||(User.IsInRole("coach") && Model?.Doctor.Id == (await UserManager.GetUserAsync(User)).ModelId))
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.Doctor.Id">Edit</a> 
+    }
+    |<a asp-action="Index">Back to List</a>
 </div>
+
 <div class="container p-0">
     <div class="row pb-3">
         <div class="col-md-9">
             <h4>Специальности</h4>
         </div>
-        <div class="col-md-3 text-end">
-            <a asp-action="AddSpecialtyToDoctor" asp-route-id="@Model.Doctor.Id" class="btn btn-info">Изменить</a>
-        </div>
-
+        @if (User.IsInRole("admin") || (User.IsInRole("coach") && Model?.Doctor.Id == (await UserManager.GetUserAsync(User)).ModelId))
+        {
+            <div class="col-md-3 text-end">
+                <a asp-action="AddSpecialtyToDoctor" asp-route-id="@Model.Doctor.Id" class="btn btn-info">Изменить</a>
+            </div>
+        }
     </div>
 </div>
 
@@ -80,11 +90,14 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.NameSpecialty)
                 </td>
-                <td>
-                    <a asp-controller="Specialties" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-controller="Specialties" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-controller="Specialties" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
+                @if (User.IsInRole("admin") || (User.IsInRole("coach") && Model?.Doctor.Id == (await UserManager.GetUserAsync(User)).ModelId))
+                {
+                    <td>
+                        <a asp-controller="Specialties" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-controller="Specialties" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-controller="Specialties" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                }
             </tr>
         }
     </tbody>
