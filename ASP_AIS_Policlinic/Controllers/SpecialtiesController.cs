@@ -10,6 +10,7 @@ using ASP_AIS_Policlinic.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using ASP_AIS_Policlinic.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
+using OfficeOpenXml;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -18,11 +19,13 @@ namespace ASP_AIS_Policlinic.Controllers
     {
         private readonly AppDBContext _context;
         private readonly UserManager<PoliclinicUser> _userManager;
+        private readonly IWebHostEnvironment _appEnvironment;
 
-        public SpecialtiesController(AppDBContext context, UserManager<PoliclinicUser> userManager)
+        public SpecialtiesController(AppDBContext context, UserManager<PoliclinicUser> userManager, IWebHostEnvironment appEnvironment)
         {
             _context = context;
             _userManager = userManager;
+            _appEnvironment = appEnvironment;
         }
 
         // GET: Specialties
@@ -214,6 +217,121 @@ namespace ASP_AIS_Policlinic.Controllers
         private bool SpecialtyExists(int id)
         {
           return _context.Specialties.Any(e => e.Id == id);
+        }
+
+        
+        public FileResult? GetReportAboutDoctor(int? id)
+        {
+            if (id == null || _context.Specialties == null)
+            {
+                return null;
+            }
+            // Путь к файлу с шаблоном
+            string path = "/Reports/templates/report_template_of_specialtyDoctors.xlsx";
+            //Путь к файлу с результатом
+            string result = "/Reports/report_specialties.xlsx";
+            FileInfo fi = new FileInfo(_appEnvironment.WebRootPath + path);
+            FileInfo fr = new FileInfo(_appEnvironment.WebRootPath + result);
+            //будем использовть библитотеку не для коммерческого использования
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            //открываем файл с шаблоном
+            using (ExcelPackage excelPackage = new ExcelPackage(fi))
+            {
+                //устанавливаем поля документа
+                excelPackage.Workbook.Properties.Author = "Сеничкин Д.О.";
+                excelPackage.Workbook.Properties.Title = "Список врачей по специальностям";
+                excelPackage.Workbook.Properties.Subject = "Врачи";
+                excelPackage.Workbook.Properties.Created = DateTime.Now;
+
+                //плучаем лист по имени.
+                ExcelWorksheet worksheet =
+                    excelPackage.Workbook.Worksheets["Doctors"];
+                //получаем списко пользователей и в цикле заполняем лист данными
+                int startLine = 3;
+                List<Doctor> Doctors = _context.Doctors.Include(d => d.Specialties).ToList();
+                worksheet.Cells[startLine, 7].Value = _context.Specialties.Where(sp => sp.Id == id).First().NameSpecialty;
+                foreach (Doctor doctor in Doctors)
+                {
+                    if(doctor.Specialties.Contains(_context.Specialties.Where(sp => sp.Id == id).First()))
+                    {
+                        worksheet.Cells[startLine, 1].Value = startLine - 2;
+                        worksheet.Cells[startLine, 2].Value = doctor.Id;
+                        worksheet.Cells[startLine, 3].Value = doctor.LastName;
+                        worksheet.Cells[startLine, 4].Value = doctor.FirstName;
+                        worksheet.Cells[startLine, 5].Value = doctor.Patronymic;
+                        worksheet.Cells[startLine, 6].Value = doctor.WorkExperience;
+                        startLine++;
+                    }                   
+                }
+                //созраняем в новое место
+                excelPackage.SaveAs(fr);
+                // Тип файла - content-type
+                string file_type =
+                    "application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet";
+                // Имя файла - необязательно
+                string file_name = "report_specialties.xlsx";
+                return File(result, file_type, file_name);
+            }
+        }
+        public FileResult? GetReportAboutDoctorAll()
+        {
+            if (_context.Specialties == null)
+            {
+                return null;
+            }
+            // Путь к файлу с шаблоном
+            string path = "/Reports/templates/report_template_of_specialtyDoctors.xlsx";
+            //Путь к файлу с результатом
+            string result = "/Reports/report_specialtiesAll.xlsx";
+            FileInfo fi = new FileInfo(_appEnvironment.WebRootPath + path);
+            FileInfo fr = new FileInfo(_appEnvironment.WebRootPath + result);
+            //будем использовть библитотеку не для коммерческого использования
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            //открываем файл с шаблоном
+            using (ExcelPackage excelPackage = new ExcelPackage(fi))
+            {
+                //устанавливаем поля документа
+                excelPackage.Workbook.Properties.Author = "Сеничкин Д.О.";
+                excelPackage.Workbook.Properties.Title = "Список врачей по специальностям";
+                excelPackage.Workbook.Properties.Subject = "Врачи";
+                excelPackage.Workbook.Properties.Created = DateTime.Now;
+
+                //плучаем лист по имени.
+                ExcelWorksheet worksheet =
+                    excelPackage.Workbook.Worksheets["Doctors"];
+                //получаем списко пользователей и в цикле заполняем лист данными
+                int startLine = 3;
+                List<Doctor> Doctors = _context.Doctors.Include(d => d.Specialties).ToList();
+                List<Specialty> Specialties = _context.Specialties.Include(sp => sp.Doctors).ToList();
+               
+
+                foreach(Specialty specialty in Specialties)
+                {
+                    worksheet.Cells[startLine, 7].Value = specialty.NameSpecialty;
+                    foreach (Doctor doctor in Doctors)
+                    {
+                        if (doctor.Specialties.Contains(specialty))
+                        {
+                            worksheet.Cells[startLine, 1].Value = startLine - 2;
+                            worksheet.Cells[startLine, 2].Value = doctor.Id;
+                            worksheet.Cells[startLine, 3].Value = doctor.LastName;
+                            worksheet.Cells[startLine, 4].Value = doctor.FirstName;
+                            worksheet.Cells[startLine, 5].Value = doctor.Patronymic;
+                            worksheet.Cells[startLine, 6].Value = doctor.WorkExperience;
+                            startLine++;
+                        }
+                    }
+                }
+                
+                //созраняем в новое место
+                excelPackage.SaveAs(fr);
+                // Тип файла - content-type
+                string file_type =
+                    "application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet";
+                // Имя файла - необязательно
+                string file_name = "report_specialtiesAll.xlsx";
+                return File(result, file_type, file_name);
+            }
         }
     }
 }

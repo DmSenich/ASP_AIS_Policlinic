@@ -1,5 +1,7 @@
-﻿using ASP_AIS_Policlinic.Models;
+﻿using ASP_AIS_Policlinic.Areas.Identity.Data;
+using ASP_AIS_Policlinic.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,14 +12,23 @@ namespace ASP_AIS_Policlinic.Controllers
     public class RecordDiagnosisController : Controller
     {
         private readonly AppDBContext _context;
+        private readonly UserManager<PoliclinicUser> _userManager;
 
-        public RecordDiagnosisController(AppDBContext context)
+        public RecordDiagnosisController(AppDBContext context, UserManager<PoliclinicUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
         {
+            if (User.IsInRole("guest"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                ViewBag.PatientId = user.ModelId;
+                return View(nameof(ChooseDoctor), await _context.Doctors.ToListAsync());
+                //ViewBag.Pa
+            }
             return View(await _context.Patients.ToListAsync());
         }
         [HttpPost]
@@ -29,7 +40,13 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
             ViewBag.PatientId = patientId;
-            ViewBag.Patient = patient;
+            if (User.IsInRole("coach"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                ViewBag.DoctorId = user.ModelId;
+                return RedirectToAction(nameof(ChooseDoctor), new {patientId, ViewBag.DoctorId});
+            }
+            //ViewBag.Patient = patient;
             return View(nameof(ChooseDoctor), await _context.Doctors.ToListAsync());
         }
 
@@ -47,9 +64,9 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
             ViewBag.PatientId = patientId;
-            ViewBag.Patient = patient;
+            //ViewBag.Patient = patient;
             ViewBag.DoctorId = doctorId;
-            ViewBag.Doctor = doctor;
+            //ViewBag.Doctor = doctor;
             return View(nameof(ChooseDate), await _context.Visitings.ToListAsync());
         }
         public async Task<IActionResult> ChooseDate()

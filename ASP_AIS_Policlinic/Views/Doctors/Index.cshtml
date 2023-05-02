@@ -5,10 +5,17 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>Список врачей</h1>
+
+@if (User.IsInRole("admin"))
+{
+    <p>
+        <a asp-action="Create">Добавить нового</a>
+    </p>
+}
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="GetReport">Создать отчет</a>
 </p>
 <table class="table">
     <thead>

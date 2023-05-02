@@ -7,8 +7,15 @@
 
 <h1>Раздел о типах заболеваний</h1>
 
+@if (!User.IsInRole("guest"))
+{
+    <p>
+        <a asp-action="Create">Добавить</a>
+    </p>
+}
+
 <p>
-    <a asp-action="Create">Добавить</a>
+    <a asp-action="GetReportAll">Создать отчет о случаях заболевания</a>
 </p>
 <table class="table">
     <thead>

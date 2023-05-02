@@ -7,9 +7,12 @@
 
 <h1>Раздел о пациентах</h1>
 
+@if (User.IsInRole("admin"))
+{
 <p>
     <a asp-action="Create">Добавить</a>
 </p>
+}
 <table class="table">
     <thead>
         <tr>

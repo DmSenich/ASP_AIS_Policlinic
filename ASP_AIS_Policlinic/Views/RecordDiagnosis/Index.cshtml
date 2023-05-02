@@ -11,8 +11,12 @@
 
 <h1>Выбор пациента</h1>
 <div class="form-group">
-    <a asp-controller="Patients" asp-action="Create" asp-route-fromRecordDiagnosis="true"
-    class="btn btn-info">Создать нового</a>
+    @if (User.IsInRole("admin"))
+    {
+        <a asp-controller="Patients" asp-action="Create" asp-route-fromRecordDiagnosis="true"
+           class="btn btn-info">Создать нового</a>
+    }
+    
 </div>
 <table class="table table-bordered table-hover">
      <tr>

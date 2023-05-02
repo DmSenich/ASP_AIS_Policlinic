@@ -7,9 +7,19 @@
 
 <h1>Раздел о встречах</h1>
 
-<p>
-    <a asp-action="Create">Создать</a>
-</p>
+@if (User.IsInRole("admin"))
+{
+    <p>
+        <a asp-action="Create">Создать</a>
+    </p>
+}
+@if (!User.IsInRole("guest"))
+{
+    <p>
+        <a asp-action="GetReport">Создать отчет о визитах</a>
+    </p>
+}
+
 <table class="table">
     <thead>
         <tr>

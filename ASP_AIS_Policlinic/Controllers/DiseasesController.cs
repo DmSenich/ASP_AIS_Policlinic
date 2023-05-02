@@ -26,6 +26,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Diseases
+        [Authorize(Roles = "coach, admin")]
         public async Task<IActionResult> Index()
         {
             var appDBContext = _context.Diseases.Include(d => d.DiseaseType).Include(d => d.Visiting);

@@ -10,6 +10,7 @@ using ASP_AIS_Policlinic.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using ASP_AIS_Policlinic.Areas.Identity.Data;
+using OfficeOpenXml;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -87,6 +88,7 @@ namespace ASP_AIS_Policlinic.Controllers
             Specialty specialty = _context.Specialties.Include(sp => sp.Doctors).FirstOrDefault(sp => sp.Id == specialtyId);
             Doctor doctor = _context.Doctors.Include(d => d.Specialties).FirstOrDefault(d => d.Id == doctorId);
 
+#pragma warning disable CS8604 // Возможно, аргумент-ссылка, допускающий значение NULL.
             if (specialty.Doctors.Contains(doctor))
             {
                 specialty.Doctors.Remove(doctor);
@@ -97,6 +99,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 specialty.Doctors.Add(doctor);
                 doctor.Specialties.Add(specialty);
             }
+#pragma warning restore CS8604 // Возможно, аргумент-ссылка, допускающий значение NULL.
             
             await _context.SaveChangesAsync();
 
@@ -301,6 +304,64 @@ namespace ASP_AIS_Policlinic.Controllers
         private bool DoctorExists(int id)
         {
           return _context.Doctors.Any(e => e.Id == id);
+        }
+
+        public FileResult GetReport()
+        {
+            // Путь к файлу с шаблоном
+            string path = "/Reports/templates/report_template_of_specialtyDoctors_ALL.xlsx";
+            //Путь к файлу с результатом
+            string result = "/Reports/report_doctors.xlsx";
+            FileInfo fi = new FileInfo(_appEnvironment.WebRootPath + path);
+            FileInfo fr = new FileInfo(_appEnvironment.WebRootPath + result);
+            //будем использовть библитотеку не для коммерческого использования
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            //открываем файл с шаблоном
+            using (ExcelPackage excelPackage = new ExcelPackage(fi))
+            {
+                //устанавливаем поля документа
+                excelPackage.Workbook.Properties.Author = "Сеничкин Д.О.";
+                excelPackage.Workbook.Properties.Title = "Список врачей";
+                excelPackage.Workbook.Properties.Subject = "Врачи";
+                excelPackage.Workbook.Properties.Created = DateTime.Now;
+
+                //плучаем лист по имени.
+                ExcelWorksheet worksheet =
+                    excelPackage.Workbook.Worksheets["Doctors"];
+                //получаем списко пользователей и в цикле заполняем лист данными
+                int startLine = 3;
+                List<Doctor> Doctors = _context.Doctors.Include(d => d.Specialties).ToList();
+                foreach(Doctor doctor in Doctors)
+                {
+                    List<Specialty> specialties = doctor.Specialties.ToList();
+                    worksheet.Cells[startLine, 1].Value = startLine - 2;
+                    worksheet.Cells[startLine, 2].Value = doctor.Id;
+                    worksheet.Cells[startLine, 3].Value = doctor.LastName;
+                    worksheet.Cells[startLine, 4].Value = doctor.FirstName;
+                    worksheet.Cells[startLine, 5].Value = doctor.Patronymic;
+                    worksheet.Cells[startLine, 6].Value = doctor.WorkExperience;
+                    if(specialties != null)
+                    {
+                        string[] strSp = new string[specialties.Count];
+                        int i = 0;
+                        foreach(Specialty specialty in specialties)
+                        {
+                            strSp[i] = specialty.NameSpecialty;
+                            i++;
+                        }
+                        worksheet.Cells[startLine, 7].Value = String.Join(", ", strSp);
+                    }
+                    startLine++;
+                }
+                //созраняем в новое место
+                excelPackage.SaveAs(fr);
+                // Тип файла - content-type
+                string file_type =
+                    "application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet";
+                // Имя файла - необязательно
+                string file_name = "report_doctors.xlsx";
+                return File(result, file_type, file_name);
+            }
         }
     }
 }

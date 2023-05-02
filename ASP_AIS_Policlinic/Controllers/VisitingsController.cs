@@ -11,6 +11,7 @@ using ASP_AIS_Policlinic.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using ASP_AIS_Policlinic.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
+using OfficeOpenXml;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -19,18 +20,29 @@ namespace ASP_AIS_Policlinic.Controllers
     {
         private readonly AppDBContext _context;
         private readonly UserManager<PoliclinicUser> _userManager;
+        private readonly IWebHostEnvironment _appEnvironment;
 
-        public VisitingsController(AppDBContext context, UserManager<PoliclinicUser> userManager)
+        public VisitingsController(AppDBContext context, UserManager<PoliclinicUser> userManager, IWebHostEnvironment appEnvironment)
         {
             _context = context;
             _userManager = userManager;
+            _appEnvironment = appEnvironment;
         }
 
         // GET: Visitings
         public async Task<IActionResult> Index()
         {
-            var appDBContext = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient);
-            return View(await appDBContext.ToListAsync());
+            if (User.IsInRole("guest"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var appDBContext = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Where(v=>v.PatientId == user.ModelId);
+                return View(await appDBContext.ToListAsync());
+            }
+            else
+            {
+                var appDBContext = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient);
+                return View(await appDBContext.ToListAsync());
+            }      
         }
 
         // GET: Visitings/Details/5
@@ -218,6 +230,67 @@ namespace ASP_AIS_Policlinic.Controllers
         private bool VisitingExists(int id)
         {
           return _context.Visitings.Any(e => e.Id == id);
+        }
+
+        public FileResult GetReport()
+        {
+            // Путь к файлу с шаблоном
+            string path = "/Reports/templates/report_template_of_visitings.xlsx";
+            //Путь к файлу с результатом
+            string result = "/Reports/report_visitings.xlsx";
+            FileInfo fi = new FileInfo(_appEnvironment.WebRootPath + path);
+            FileInfo fr = new FileInfo(_appEnvironment.WebRootPath + result);
+            //будем использовть библитотеку не для коммерческого использования
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            //открываем файл с шаблоном
+            using (ExcelPackage excelPackage = new ExcelPackage(fi))
+            {
+                //устанавливаем поля документа
+                excelPackage.Workbook.Properties.Author = "Сеничкин Д.О.";
+                excelPackage.Workbook.Properties.Title = "Список посещений";
+                excelPackage.Workbook.Properties.Subject = "Посещения";
+                excelPackage.Workbook.Properties.Created = DateTime.Now;
+
+                //плучаем лист по имени.
+                ExcelWorksheet worksheet =
+                    excelPackage.Workbook.Worksheets["Visitings"];
+                //получаем списко пользователей и в цикле заполняем лист данными
+                int startLine = 3;
+                List<Visiting> Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).ToList();
+                List<Doctor> Doctors = _context.Doctors.Include(d => d.Visitings).ToList();
+                
+                foreach (Doctor doctor in Doctors)
+                {
+                    if (doctor.Visitings != null)
+                    {
+                        worksheet.Cells[startLine, 7].Value = doctor.FirstName;
+                        worksheet.Cells[startLine, 8].Value = doctor.LastName;
+                        worksheet.Cells[startLine, 9].Value = doctor.Patronymic;
+                        foreach (Visiting visiting in Visitings)
+                        {
+                            if (doctor.Visitings.Contains(visiting))
+                            {
+                                worksheet.Cells[startLine, 1].Value = startLine - 2;
+                                worksheet.Cells[startLine, 2].Value = visiting.Id;
+                                worksheet.Cells[startLine, 3].Value = visiting.DateVisiting;
+                                worksheet.Cells[startLine, 4].Value = visiting.Patient.FirstName;
+                                worksheet.Cells[startLine, 5].Value = visiting.Patient.LastName;
+                                worksheet.Cells[startLine, 6].Value = visiting.Patient.Patronymic;
+                                startLine++;
+                            }
+                        }
+                        
+                    }
+                }
+                //созраняем в новое место
+                excelPackage.SaveAs(fr);
+                // Тип файла - content-type
+                string file_type =
+                    "application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet";
+                // Имя файла - необязательно
+                string file_name = "report_visitings.xlsx";
+                return File(result, file_type, file_name);
+            }
         }
     }
 }
