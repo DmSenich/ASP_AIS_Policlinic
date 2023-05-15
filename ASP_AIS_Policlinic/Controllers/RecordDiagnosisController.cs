@@ -44,7 +44,7 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 var user = await _userManager.GetUserAsync(User);
                 ViewBag.DoctorId = user.ModelId;
-                return RedirectToAction(nameof(ChooseDoctor), new {patientId, ViewBag.DoctorId});
+                return RedirectToAction(nameof(ChooseDate));
             }
             //ViewBag.Patient = patient;
             return View(nameof(ChooseDoctor), await _context.Doctors.ToListAsync());

@@ -23,7 +23,11 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Specialty.Id">Редактировать</a> |
+    @if (User.IsInRole("admin"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.Specialty.Id">Редактировать</a><p>|</p>
+    }
+    
     <a asp-action="Index">Вернуться к списку</a>
 </div>
 
@@ -32,9 +36,13 @@
         <div class="col-md-9">
             <h4>Врачи</h4>
         </div>
-        <div class="col-md-3 text-end">
-            <a asp-action="AddDoctorToSpecialty" asp-route-id="@Model.Specialty.Id" class="btn btn-info">Изменить</a>
-        </div>
+        @if (User.IsInRole("admin"))
+        {
+            <div class="col-md-3 text-end">
+                <a asp-action="AddDoctorToSpecialty" asp-route-id="@Model.Specialty.Id" class="btn btn-info">Изменить</a>
+            </div>
+        }
+        
 
     </div>
 </div>
@@ -56,9 +64,14 @@
                     @Html.DisplayFor(modelItem => item.LastName)
                 </td>
                 <td>
-                    <a asp-controller="Doctors" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                     <a asp-controller="Doctors" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-controller="Doctors" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    @if (User.IsInRole("admin"))
+                    {
+                        <a asp-controller="Doctors" asp-action="Edit" asp-route-id="@item.Id">Edit</a> <p>|</p>
+
+                        <a asp-controller="Doctors" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    }
+                    
                 </td>
             </tr>
         }

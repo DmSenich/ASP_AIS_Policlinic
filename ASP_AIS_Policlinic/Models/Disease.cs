@@ -10,7 +10,8 @@ namespace ASP_AIS_Policlinic.Models
         [ScaffoldColumn(false)]
         public int Id { get; set; }
 
-        [MaxLength(100)]
+        
+        [MaxLength(1024)]
         [Required(ErrorMessage = "Введите описание диагноза")]
         [DisplayName("Описание")]
         public string Description { get; set; }

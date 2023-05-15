@@ -16,9 +16,13 @@
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
+            @if (User.IsInRole("admin"))
+            {
+                <th>
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+            }
+            
             <th>
                 @Html.DisplayNameFor(model => model.DiseaseType)
             </th>
@@ -30,10 +34,14 @@
     </thead>
     <tbody>
 @foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
+            <tr>
+                @if (User.IsInRole("admin"))
+                {
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                }
+                
             <td>
                 @Html.DisplayFor(modelItem => item.DiseaseType.NameDisease)
             </td>

@@ -93,9 +93,13 @@
                 @if (User.IsInRole("admin") || (User.IsInRole("coach") && Model?.Doctor.Id == (await UserManager.GetUserAsync(User)).ModelId))
                 {
                     <td>
-                        <a asp-controller="Specialties" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                         <a asp-controller="Specialties" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-controller="Specialties" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        @if (User.IsInRole("admin"))
+                        {
+                            <a asp-controller="Specialties" asp-action="Edit" asp-route-id="@item.Id">Edit</a> <p>|</p>
+                            <a asp-controller ="Specialties" asp-action = "Delete" asp-route-id = "@item.Id" > Delete </a>
+                        }
+                        
                     </td>
                 }
             </tr>

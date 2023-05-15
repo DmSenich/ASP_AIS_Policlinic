@@ -53,16 +53,20 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Diseases/Create
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int? diseaseTypeId)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if(!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
             {
                 return new StatusCodeResult(403);
             }
-
-            ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease");
-            ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id");
+            if(diseaseTypeId != null)
+            {
+                ViewBag.diseaseTypeId = diseaseTypeId;
+                ViewBag.diseaseType = (await _context.DiseaseTypes.FindAsync(diseaseTypeId)).NameDisease;
+            }
+            //ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease");
+            //ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id");
             return View();
         }
 
@@ -71,8 +75,10 @@ namespace ASP_AIS_Policlinic.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Description")] Disease disease)
+        public async Task<IActionResult> Create(Disease disease)
         {
+            var diseaseType = await _context.DiseaseTypes.FindAsync(disease.DiseaseTypeId);
+            disease.DiseaseType = diseaseType;
             if (ModelState.IsValid)
             {
                 _context.Add(disease);
@@ -85,7 +91,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Diseases/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, int? diseaseTypeId)
         {
             if (id == null || _context.Diseases == null)
             {
@@ -96,14 +102,25 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return new StatusCodeResult(403);
             }
+            
+            var disease = await _context.Diseases.Include(d => d.Visiting).Include(d => d.DiseaseType).FirstAsync(d => d.Id == id);
+            if (diseaseTypeId != null)
+            {
+                ViewBag.diseaseTypeId = diseaseTypeId;
+                ViewBag.diseaseType = (await _context.DiseaseTypes.FindAsync(diseaseTypeId)).NameDisease;
+            }
+            else
+            {
+                ViewBag.diseaseTypeId = disease.DiseaseTypeId;
+                ViewBag.diseaseType = disease.DiseaseType.NameDisease;
+            }
 
-            var disease = await _context.Diseases.FindAsync(id);
             if (disease == null)
             {
                 return NotFound();
             }
-            ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
-            ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
+            //ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
+            //ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
             return View(disease);
         }
 
@@ -118,7 +135,8 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return NotFound();
             }
-
+            var visiting = await _context.Visitings.FirstAsync(v => v.Id == disease.VisitingId);
+            disease.Visiting = visiting;
             if (ModelState.IsValid)
             {
                 try
@@ -139,9 +157,70 @@ namespace ASP_AIS_Policlinic.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
-            ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
+            //ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
+            //ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
             return View(disease);
+        }
+
+
+        public async Task<IActionResult> EditDiseaseType(int? id)
+        {
+            if (_context.Diseases == null)
+            {
+                return NotFound();
+            }
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
+            }
+
+            //var disease = await _context.Diseases.Include(d => d.Visiting).Include(d => d.DiseaseType).FirstAsync(d => d.Id == id);
+            var diseaseTypes = await _context.DiseaseTypes.ToListAsync();
+            
+            ViewBag.DiseaseId = id;
+            if (diseaseTypes == null)
+            {
+                return NotFound();
+            }
+
+            return View(diseaseTypes);
+        }
+        [HttpPost]
+        public async Task<IActionResult> EditDiseaseType(int? diseaseId, int diseaseTypeId, bool? toCreate)
+        {
+            
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            {
+                return new StatusCodeResult(403);
+            }
+
+            if (toCreate == true)
+            {
+                if (diseaseTypeId == null)
+                {
+                    return NotFound();
+                }
+                return RedirectToAction(nameof(Create), new { diseaseTypeId = diseaseTypeId });
+            }
+            else
+            {
+                if (diseaseId == null || diseaseTypeId == null)
+                {
+                    return NotFound();
+                }
+                return RedirectToAction(nameof(Edit), new { id = diseaseId, diseaseTypeId = diseaseTypeId });
+                
+            }
+
+            //var disease = await _context.Diseases.Include(d => d.Visiting).Include(d => d.DiseaseType).FirstAsync(d => d.Id == id);
+            //Disease disease = await _context.Diseases.Include(d => d.DiseaseType).FirstAsync(d => d.Id == diseaseId);
+            //DiseaseType diseaseType = await _context.DiseaseTypes.FirstAsync(d => d.Id == diseaseTypeId);
+            //disease.DiseaseType = diseaseType;
+            //disease.DiseaseTypeId = diseaseTypeId;
+
+
         }
 
         // GET: Diseases/Delete/5

@@ -47,7 +47,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
             ViewBag.PatientId = id;
-            var diseases = await _context.Diseases.Include(d => d.Visiting).Where(d=>d.Visiting.PatientId == id).ToListAsync();
+            var diseases = await _context.Diseases.Include(d => d.DiseaseType).Include(d => d.Visiting).Where(d=>d.Visiting.PatientId == id).ToListAsync();
             
             //var visitings = await _context.Visitings
             //    .Include(v => v.Doctor)
