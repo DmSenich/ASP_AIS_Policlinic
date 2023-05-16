@@ -16,10 +16,33 @@
 @if (!User.IsInRole("guest"))
 {
     <p>
-        <a asp-action="GetReport">Создать отчет о визитах</a>
+        <a asp-action="GetReport" asp-route-dates="@ViewBag.DateRange">Создать отчет о визитах</a>
     </p>
 }
-
+<form asp-action="Index">
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Даты
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <input type="text" id="dateRange" value="@ViewBag.DateRange" name="dateRange"/>
+                <input type="submit" value="Подтвердить" class="btn btn-primary" />
+                   @* <a asp-action="Details" asp-route-id="@item.Id">Details</a>*@
+            </td>
+        </tr>
+    </tbody>
+</table>
+</form>
+<form asp-action="Index">
+    <input type="hidden" value="@null" name="dateRange" />
+    <input type="submit" value="Сбросить" class="btn btn-primary" />
+</form>
 <table class="table">
     <thead>
         <tr>

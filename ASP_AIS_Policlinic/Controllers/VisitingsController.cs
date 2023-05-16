@@ -30,18 +30,49 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Visitings
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(String? dateRange)
         {
+            //dates.ToString();
+            List<DateTime> dates = new List<DateTime>();
+            if (dateRange != null)
+            {
+                
+                foreach(string date in dateRange.Split("-"))
+                {
+                    dates.Add(DateTime.Parse(date));
+                }
+                
+            }
+            ViewBag.DateRange = dateRange;
             if (User.IsInRole("guest"))
             {
+                
                 var user = await _userManager.GetUserAsync(User);
-                var appDBContext = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Where(v=>v.PatientId == user.ModelId);
-                return View(await appDBContext.ToListAsync());
+                if (dates.Count != 0)
+                {
+                    var appDBContext = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Where(v => v.PatientId == user.ModelId).Where(v => v.DateVisiting >= dates[0] && v.DateVisiting <= dates[1]);
+                    return View(await appDBContext.ToListAsync());
+                }
+                else
+                {
+                    var appDBContext = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Where(v => v.PatientId == user.ModelId);
+                    return View(await appDBContext.ToListAsync());
+                }
+                
             }
             else
             {
-                var appDBContext = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient);
-                return View(await appDBContext.ToListAsync());
+                if (dates.Count != 0)
+                {
+                    var appDBContext = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Where(v => v.DateVisiting >= dates[0] && v.DateVisiting <= dates[1]);
+                    return View(await appDBContext.ToListAsync());
+                }
+                else
+                {
+                    var appDBContext = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient);
+                    return View(await appDBContext.ToListAsync());
+                }
+                
             }      
         }
 
@@ -232,9 +263,19 @@ namespace ASP_AIS_Policlinic.Controllers
           return _context.Visitings.Any(e => e.Id == id);
         }
 
-        public FileResult GetReport()
+        public FileResult GetReport(String? dates)
         {
             // Путь к файлу с шаблоном
+            List<DateTime> dateList = new List<DateTime>();
+            if (dates != null)
+            {
+
+                foreach (string date in dates.Split("-"))
+                {
+                    dateList.Add(DateTime.Parse(date));
+                }
+
+            }
             string path = "/Reports/templates/report_template_of_visitings.xlsx";
             //Путь к файлу с результатом
             string result = "/Reports/report_visitings.xlsx";
@@ -256,7 +297,15 @@ namespace ASP_AIS_Policlinic.Controllers
                     excelPackage.Workbook.Worksheets["Visitings"];
                 //получаем списко пользователей и в цикле заполняем лист данными
                 int startLine = 3;
-                List<Visiting> Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).ToList();
+                List<Visiting> Visitings;
+                if(dateList.Count > 0)
+                {
+                    Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Where(v => v.DateVisiting >= dateList[0] && v.DateVisiting <= dateList[1]).ToList();
+                }
+                else
+                {
+                    Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).ToList();
+                }
                 List<Doctor> Doctors = _context.Doctors.Include(d => d.Visitings).ToList();
                 
                 foreach (Doctor doctor in Doctors)
