@@ -44,7 +44,7 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 var user = await _userManager.GetUserAsync(User);
                 ViewBag.DoctorId = user.ModelId;
-                return RedirectToAction(nameof(ChooseDate));
+                return RedirectToAction(nameof(ChooseDate), new {doctorId = ViewBag.DoctorId, patientId = ViewBag.PatientId});
             }
             //ViewBag.Patient = patient;
             return View(nameof(ChooseDoctor), await _context.Doctors.ToListAsync());
@@ -69,8 +69,11 @@ namespace ASP_AIS_Policlinic.Controllers
             //ViewBag.Doctor = doctor;
             return View(nameof(ChooseDate), await _context.Visitings.ToListAsync());
         }
-        public async Task<IActionResult> ChooseDate()
+        public async Task<IActionResult> ChooseDate(int doctorId, int patientId)
         {
+            ViewBag.PatientId = patientId;
+
+            ViewBag.DoctorId = doctorId;
             //ViewBag.Today = DateTime.Now.ToShortDateString();
             return View(await _context.Visitings.ToListAsync());
         }

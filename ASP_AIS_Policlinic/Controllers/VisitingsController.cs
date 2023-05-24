@@ -83,7 +83,11 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return NotFound();
             }
-
+            var user = await _userManager.GetUserAsync(User);
+            if (User.IsInRole("coach"))
+            {
+                ViewBag.DoctorId = user.ModelId;
+            }
             var visiting = await _context.Visitings
                 .Include(v => v.Doctor)
                 .Include(v => v.Patient)

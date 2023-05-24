@@ -14,9 +14,9 @@
 <div>
     @*<a asp-controller="Visitings" asp-action="Create" asp-route-fromRecordDiagnosis="true"
     class="btn btn-info">Создать нового</a>*@
-    <input type="hidden" name="PatientId" value="@ViewBag.PatientId"/>
-    <input type="hidden" name="DoctorId" value="@ViewBag.DoctorId"/> 
-        <input type="date" name="VisitingDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control"/>
+    <input type="hidden" name="patientId" value="@ViewBag.PatientId"/>
+    <input type="hidden" name="doctorId" value="@ViewBag.DoctorId"/> 
+    <input type="date" name="visitingDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control"/>
     <input type="submit" value="Выбрать" class="btn btn-primary"/>
 </div>
 }

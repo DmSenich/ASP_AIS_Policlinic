@@ -7,8 +7,33 @@
 
 <h1>Список диагнозов</h1>
 <p>
-    <a asp-action="GetReport" asp-route-id="@ViewBag.PatientId">Создать отчет об истории заболеваний</a>
+    <a asp-action="GetReport" asp-route-id="@ViewBag.PatientId" asp-route-dateRange="@ViewBag.DateRange">Создать отчет об истории заболеваний</a>
 </p>
+<form asp-action="ListDiseases">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Даты
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <input type="text" id="dateRange" value="@ViewBag.DateRange" name="dateRange" />
+                    <input type="submit" value="Подтвердить" class="btn btn-primary" />
+                    @* <a asp-action="Details" asp-route-id="@item.Id">Details</a>*@
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+<form asp-action="ListDiseases">
+    <input type="hidden" value="@null" name="dateRange" />
+    <input type="submit" value="Сбросить" class="btn btn-primary" />
+</form>
+
 <table class="table">
     <thead>
         <tr>

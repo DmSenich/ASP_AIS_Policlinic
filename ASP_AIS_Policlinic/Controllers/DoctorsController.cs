@@ -132,7 +132,7 @@ namespace ASP_AIS_Policlinic.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Doctor doctor, IFormFile upload, int[] selectedSpecialties)
+        public async Task<IActionResult> Create(Doctor doctor, IFormFile upload)
         {
             if (ModelState.IsValid /*&& selectedSpecialties != null*/)
             {
@@ -206,7 +206,7 @@ namespace ASP_AIS_Policlinic.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Doctor doctor, int[] selectedSpecialties, IFormFile? upload)
+        public async Task<IActionResult> Edit(int id, Doctor doctor, IFormFile? upload)
         {
             if (id != doctor.Id)
             {

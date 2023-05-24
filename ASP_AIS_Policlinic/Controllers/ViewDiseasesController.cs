@@ -40,14 +40,36 @@ namespace ASP_AIS_Policlinic.Controllers
             
             return RedirectToAction(nameof(ListDiseases), new { id }); 
         }
-        public async Task<IActionResult> ListDiseases(int? id)
+        public async Task<IActionResult> ListDiseases(int? id, string? dateRange)
         {
             if (id == null || _context.Visitings == null)
             {
                 return NotFound();
             }
+            List<DateTime> dates = new List<DateTime>();
+            if (dateRange != null)
+            {
+
+                foreach (string date in dateRange.Split("-"))
+                {
+                    dates.Add(DateTime.Parse(date));
+                }
+
+            }
+            ViewBag.DateRange = dateRange;
             ViewBag.PatientId = id;
-            var diseases = await _context.Diseases.Include(d => d.DiseaseType).Include(d => d.Visiting).Where(d=>d.Visiting.PatientId == id).ToListAsync();
+
+            if (dates.Count != 0)
+            {
+                var diseases = await _context.Diseases.Include(d => d.DiseaseType).Include(d => d.Visiting).Where(d => d.Visiting.PatientId == id && d.Visiting.DateVisiting >= dates[0] && d.Visiting.DateVisiting <= dates[1]).ToListAsync();
+                return View(diseases);
+            }
+            else
+            {
+                var diseases = await _context.Diseases.Include(d => d.DiseaseType).Include(d => d.Visiting).Where(d => d.Visiting.PatientId == id).ToListAsync();
+                return View(diseases);
+            }
+            
             
             //var visitings = await _context.Visitings
             //    .Include(v => v.Doctor)
@@ -66,7 +88,7 @@ namespace ASP_AIS_Policlinic.Controllers
             //    }
             //}
 
-            return View(diseases);//Model DiseaseAndVisitingViewModel
+            //Model DiseaseAndVisitingViewModel
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -90,12 +112,23 @@ namespace ASP_AIS_Policlinic.Controllers
             return View(model);
         }
 
-        public FileResult? GetReport(int? id) //id patient
+        public FileResult? GetReport(int? id, String? dateRange) //id patient
         {
             if (id == null || _context.Patients == null)
             {
                 return null;
             }
+            List<DateTime> dateList = new List<DateTime>();
+            if (dateRange != null)
+            {
+
+                foreach (string date in dateRange.Split("-"))
+                {
+                    dateList.Add(DateTime.Parse(date));
+                }
+
+            }
+
             // Путь к файлу с шаблоном
             string path = "/Reports/templates/report_template_of_historyDiseases.xlsx";
             //Путь к файлу с результатом
@@ -119,8 +152,15 @@ namespace ASP_AIS_Policlinic.Controllers
                 //получаем списко пользователей и в цикле заполняем лист данными
                 int startLine = 3;
                 List<Disease> Diseases = _context.Diseases.Include(d => d.DiseaseType).ToList();
-                List<Visiting> Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Include(v => v.Diseases).Where(v => v.PatientId == id).ToList();
-
+                List<Visiting> Visitings;
+                if (dateList.Count > 0)
+                {
+                    Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Include(v => v.Diseases).Where(v => v.PatientId == id).Where(v => v.DateVisiting >= dateList[0] && v.DateVisiting <= dateList[1]).ToList();
+                }
+                else
+                {
+                    Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Include(v => v.Diseases).Where(v => v.PatientId == id).ToList();
+                }
                 //worksheet.Cells[startLine, 10].Value = _context.DiseaseTypes.Where(dt => dt.Id == id).First().NameDisease;
                 worksheet.Cells[startLine, 9].Value = _context.Patients.Where(p => p.Id == id).First().LastName;
                 worksheet.Cells[startLine, 10].Value = _context.Patients.Where(p => p.Id == id).First().FirstName;

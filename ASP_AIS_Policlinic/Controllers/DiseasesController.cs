@@ -53,7 +53,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Diseases/Create
-        public async Task<IActionResult> Create(int? diseaseTypeId)
+        public async Task<IActionResult> Create(int? diseaseTypeId, int? visitingId)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if(!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
@@ -64,6 +64,10 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 ViewBag.diseaseTypeId = diseaseTypeId;
                 ViewBag.diseaseType = (await _context.DiseaseTypes.FindAsync(diseaseTypeId)).NameDisease;
+            }
+            if(visitingId != null)
+            {
+                ViewBag.VisitingId = visitingId;
             }
             //ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease");
             //ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id");
@@ -79,11 +83,23 @@ namespace ASP_AIS_Policlinic.Controllers
         {
             var diseaseType = await _context.DiseaseTypes.FindAsync(disease.DiseaseTypeId);
             disease.DiseaseType = diseaseType;
+            if(disease.VisitingId != null)
+            {
+                disease.Visiting = await _context.Visitings.FindAsync(disease.VisitingId);
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(disease);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (User.IsInRole("admin"))
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Index), "Home");
+                }
+                
             }
             //ViewData["DiseaseTypeId"] = new SelectList(_context.DiseaseTypes, "Id", "NameDisease", disease.DiseaseTypeId);
             //ViewData["VisitingId"] = new SelectList(_context.Visitings, "Id", "Id", disease.VisitingId);
@@ -163,7 +179,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
 
-        public async Task<IActionResult> EditDiseaseType(int? id)
+        public async Task<IActionResult> EditDiseaseType(int? id, int? visitingId)
         {
             if (_context.Diseases == null)
             {
@@ -179,6 +195,7 @@ namespace ASP_AIS_Policlinic.Controllers
             var diseaseTypes = await _context.DiseaseTypes.ToListAsync();
             
             ViewBag.DiseaseId = id;
+            ViewBag.VisitingId = visitingId;
             if (diseaseTypes == null)
             {
                 return NotFound();
@@ -187,7 +204,7 @@ namespace ASP_AIS_Policlinic.Controllers
             return View(diseaseTypes);
         }
         [HttpPost]
-        public async Task<IActionResult> EditDiseaseType(int? diseaseId, int diseaseTypeId, bool? toCreate)
+        public async Task<IActionResult> EditDiseaseType(int? diseaseId, int diseaseTypeId, bool? toCreate, int? visitingId)
         {
             
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -202,7 +219,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 {
                     return NotFound();
                 }
-                return RedirectToAction(nameof(Create), new { diseaseTypeId = diseaseTypeId });
+                return RedirectToAction(nameof(Create), new { diseaseTypeId = diseaseTypeId , visitingId = visitingId});
             }
             else
             {

@@ -45,9 +45,18 @@
         <div class="col-md-9">
             <h4>Поставленные диагнозы</h4>
         </div>
-        <div class="col-md-3 text-end">
-            <a asp-action="AddDiseaseToVisiting" asp-route-id="@Model.Visiting.Id" class="btn btn-info">Добавить ко встрече</a>
-        </div>
+        @if (User.IsInRole("admin"))
+        {
+            <div class="col-md-3 text-end">
+                <a asp-action="AddDiseaseToVisiting" asp-route-id="@Model.Visiting.Id" class="btn btn-info">Добавить ко встрече</a>
+            </div>
+        }
+        @if (User.IsInRole("coach") && ViewBag.DoctorId == Model.Visiting.DoctorId)
+        {
+            <div class="col-md-3 text-end">
+                <a asp-controller="Diseases" asp-action="Create" asp-route-visitingId="@Model.Visiting.Id" class="btn btn-info">Поставить диагноз</a>
+            </div>
+        }
 
     </div>
 </div>
@@ -75,9 +84,13 @@
                     @Html.DisplayFor(modelItem => item.Description)
                 </td>
                 <td>
-                    <a asp-controller="Diseases" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                     <a asp-controller="Diseases" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-controller="Diseases" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    @if (User.IsInRole("coach") && ViewBag.DoctorId == Model.Visiting.DoctorId || User.IsInRole("admin"))
+                    {
+                        <a asp-controller="Diseases" asp-action="Edit" asp-route-id="@item.Id">Edit</a> <p>|</p>
+                        <a asp-controller="Diseases" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    }
+                    
                 </td>
             </tr>
         }
