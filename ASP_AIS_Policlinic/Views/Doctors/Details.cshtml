@@ -8,10 +8,10 @@
 }
 
 
-<h1>Details</h1>
+<h1>Подробности</h1>
 
 <div>
-    <h4>Doctor</h4>
+    <h4>Доктор</h4>
     <hr />
     @if(ViewBag.Photodata != null)
     {
@@ -55,9 +55,9 @@
 <div>
     @if (User.IsInRole("admin") ||(User.IsInRole("coach") && Model?.Doctor.Id == (await UserManager.GetUserAsync(User)).ModelId))
     {
-        <a asp-action="Edit" asp-route-id="@Model?.Doctor.Id">Edit</a> 
+        <a asp-action="Edit" asp-route-id="@Model?.Doctor.Id">Редактировать</a> 
     }
-    |<a asp-action="Index">Back to List</a>
+    |<a asp-action="Index">Вернуться к списку</a>
 </div>
 
 <div class="container p-0">
@@ -68,7 +68,7 @@
         @if (User.IsInRole("admin") || (User.IsInRole("coach") && Model?.Doctor.Id == (await UserManager.GetUserAsync(User)).ModelId))
         {
             <div class="col-md-3 text-end">
-                <a asp-action="AddSpecialtyToDoctor" asp-route-id="@Model.Doctor.Id" class="btn btn-info">Изменить</a>
+                <a asp-action="AddSpecialtyToDoctor" asp-route-id="@Model.Doctor.Id" class="btn btn-info">Изменить специальность</a>
             </div>
         }
     </div>
@@ -96,8 +96,8 @@
                         <a asp-controller="Specialties" asp-action="Details" asp-route-id="@item.Id">Details</a> |
                         @if (User.IsInRole("admin"))
                         {
-                            <a asp-controller="Specialties" asp-action="Edit" asp-route-id="@item.Id">Edit</a> <p>|</p>
-                            <a asp-controller ="Specialties" asp-action = "Delete" asp-route-id = "@item.Id" > Delete </a>
+                            <a asp-controller="Specialties" asp-action="Edit" asp-route-id="@item.Id">Редактировать</a> <p>|</p>
+                            <a asp-controller ="Specialties" asp-action = "Delete" asp-route-id = "@item.Id" > Удалить </a>
                         }
                         
                     </td>

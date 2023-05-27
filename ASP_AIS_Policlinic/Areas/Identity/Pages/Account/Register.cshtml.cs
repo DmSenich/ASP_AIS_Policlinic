@@ -109,7 +109,7 @@ namespace ASP_AIS_Policlinic.Areas.Identity.Pages.Account
             /// </summary>
             [DataType(DataType.Password)]
             [Display(Name = "Подтвердите пароль")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Compare("Password", ErrorMessage = "Ваш пароль не совпадает.")]
             public string ConfirmPassword { get; set; }
         }
 
@@ -139,7 +139,7 @@ namespace ASP_AIS_Policlinic.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    _logger.LogInformation("Вы создали новую учетную запись.");
 
                     
                     var userId = await _userManager.GetUserIdAsync(user);

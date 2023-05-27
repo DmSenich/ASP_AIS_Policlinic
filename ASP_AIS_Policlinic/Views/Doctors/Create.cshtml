@@ -6,9 +6,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<h1>Добавить</h1>
 
-<h4>Doctor</h4>
+<h4>Доктор</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -60,14 +60,14 @@
             <input type="hidden" asp-for="toRecordDiagnosis" value="@ViewBag.toRecordDiagnosis"/>
             <input type="hidden" asp-for="toProfile" value="@ViewBag.isProfile" />
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Создать" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Вернуться к списку</a>
 </div>
 
 @section Scripts {

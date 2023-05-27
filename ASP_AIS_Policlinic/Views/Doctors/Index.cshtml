@@ -5,7 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Список врачей</h1>
+<h1>Раздел о врачах</h1>
 
 @if (User.IsInRole("admin"))
 {
@@ -65,15 +65,15 @@
                 @if (User.IsInRole("admin"))
                 {
                     <td>
-                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                         <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                         <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                         <a asp-action="Edit" asp-route-id="@item.Id">Редактировать</a> |
+                         <a asp-action="Details" asp-route-id="@item.Id">Подробности</a> |
+                         <a asp-action="Delete" asp-route-id="@item.Id">Удалить</a>
                     </td>
                 }
                 else
                 {
                      <td>
-                         <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                         <a asp-action="Details" asp-route-id="@item.Id">Подробности</a> 
                     </td>
                 }
                 
