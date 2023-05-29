@@ -56,6 +56,7 @@ namespace ASP_AIS_Policlinic.Controllers
             return View(viewModel);
         }
 
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> AddDiseaseToDiseaseType(int id)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -79,6 +80,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: DiseaseTypes/Create
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -106,6 +108,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: DiseaseTypes/Edit/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.DiseaseTypes == null)
@@ -162,6 +165,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: DiseaseTypes/Delete/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.DiseaseTypes == null)
@@ -191,7 +195,11 @@ namespace ASP_AIS_Policlinic.Controllers
         {
             if (_context.DiseaseTypes == null)
             {
-                return Problem("Entity set 'AppDBContext.DiseaseType'  is null.");
+                return Problem("Набор сущностей  'AppDBContext.DiseaseType' пуст.");
+            }
+            if(_context.Diseases.Where(d => d.DiseaseTypeId == id).Count() != 0)
+            {
+                return Problem("Существуют связанные данные (диагнозы).");
             }
             var diseaseType = await _context.DiseaseTypes.FindAsync(id);
             if (diseaseType != null)
@@ -225,9 +233,11 @@ namespace ASP_AIS_Policlinic.Controllers
             //открываем файл с шаблоном
             using (ExcelPackage excelPackage = new ExcelPackage(fi))
             {
+                var diseaseType = _context.DiseaseTypes.Where(dt => dt.Id == id).First().NameDisease;
+                
                 //устанавливаем поля документа
                 excelPackage.Workbook.Properties.Author = "Сеничкин Д.О.";
-                excelPackage.Workbook.Properties.Title = "Список заболеваний по диагнозу";
+                excelPackage.Workbook.Properties.Title = "Список заболеваний по диагнозу " + diseaseType;
                 excelPackage.Workbook.Properties.Subject = "Заболевания";
                 excelPackage.Workbook.Properties.Created = DateTime.Now;
 
@@ -238,8 +248,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 int startLine = 3;
                 List<Disease> Diseases = _context.Diseases.Include(d => d.DiseaseType).Where(d => d.DiseaseTypeId == id).ToList();
                 List<Visiting> Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Include(v => v.Diseases).ToList();
-                
-                worksheet.Cells[startLine, 10].Value = _context.DiseaseTypes.Where(dt => dt.Id == id).First().NameDisease;
+                worksheet.Cells["A1"].Value = "Список заболеваний по диагнозу " + diseaseType;
                 foreach (Visiting visiting in Visitings)
                 {
                     foreach (Disease disease in Diseases)
@@ -247,14 +256,13 @@ namespace ASP_AIS_Policlinic.Controllers
                         if (visiting.Diseases.Contains(disease))
                         {
                             worksheet.Cells[startLine, 1].Value = startLine - 2;
-                            worksheet.Cells[startLine, 2].Value = disease.Id;
-                            worksheet.Cells[startLine, 3].Value = visiting.DateVisiting;
-                            worksheet.Cells[startLine, 4].Value = visiting.Patient.FirstName;
-                            worksheet.Cells[startLine, 5].Value = visiting.Patient.LastName;
-                            worksheet.Cells[startLine, 6].Value = visiting.Patient.Patronymic;
-                            worksheet.Cells[startLine, 7].Value = visiting.Doctor.FirstName;
-                            worksheet.Cells[startLine, 8].Value = visiting.Doctor.LastName;
-                            worksheet.Cells[startLine, 9].Value = visiting.Doctor.Patronymic;
+                            worksheet.Cells[startLine, 2].Value = visiting.DateVisiting;
+                            worksheet.Cells[startLine, 3].Value = visiting.Patient.FirstName;
+                            worksheet.Cells[startLine, 4].Value = visiting.Patient.LastName;
+                            worksheet.Cells[startLine, 5].Value = visiting.Patient.Patronymic;
+                            worksheet.Cells[startLine, 6].Value = visiting.Doctor.FirstName;
+                            worksheet.Cells[startLine, 7].Value = visiting.Doctor.LastName;
+                            worksheet.Cells[startLine, 8].Value = visiting.Doctor.Patronymic;
                             startLine++;
                         }
                     }     
@@ -297,12 +305,12 @@ namespace ASP_AIS_Policlinic.Controllers
                 ExcelWorksheet worksheet =
                     excelPackage.Workbook.Worksheets["Diseases"];
                 //получаем списко пользователей и в цикле заполняем лист данными
+                worksheet.Cells[1, 10].Value = "Тип заболевания";
+
                 int startLine = 3;
                 List<DiseaseType> DiseaseTypes = _context.DiseaseTypes.Include(dt => dt.Diseases).ToList();
                 List<Disease> Diseases = _context.Diseases.Include(d => d.DiseaseType).ToList();
                 List<Visiting> Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Include(v => v.Diseases).ToList();
-
-                
 
                 foreach(DiseaseType diseaseType in DiseaseTypes) 
                 {
@@ -316,14 +324,13 @@ namespace ASP_AIS_Policlinic.Controllers
                                 if (visiting.Diseases.Contains(disease))
                                 {
                                     worksheet.Cells[startLine, 1].Value = startLine - 2;
-                                    worksheet.Cells[startLine, 2].Value = disease.Id;
-                                    worksheet.Cells[startLine, 3].Value = visiting.DateVisiting;
-                                    worksheet.Cells[startLine, 4].Value = visiting.Patient.FirstName;
-                                    worksheet.Cells[startLine, 5].Value = visiting.Patient.LastName;
-                                    worksheet.Cells[startLine, 6].Value = visiting.Patient.Patronymic;
-                                    worksheet.Cells[startLine, 7].Value = visiting.Doctor.FirstName;
-                                    worksheet.Cells[startLine, 8].Value = visiting.Doctor.LastName;
-                                    worksheet.Cells[startLine, 9].Value = visiting.Doctor.Patronymic;
+                                    worksheet.Cells[startLine, 2].Value = visiting.DateVisiting;
+                                    worksheet.Cells[startLine, 3].Value = visiting.Patient.FirstName;
+                                    worksheet.Cells[startLine, 4].Value = visiting.Patient.LastName;
+                                    worksheet.Cells[startLine, 5].Value = visiting.Patient.Patronymic;
+                                    worksheet.Cells[startLine, 6].Value = visiting.Doctor.FirstName;
+                                    worksheet.Cells[startLine, 7].Value = visiting.Doctor.LastName;
+                                    worksheet.Cells[startLine, 8].Value = visiting.Doctor.Patronymic;
                                     startLine++;
                                 }
                             }

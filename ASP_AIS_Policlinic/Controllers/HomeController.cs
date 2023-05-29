@@ -1,9 +1,11 @@
 ﻿using ASP_AIS_Policlinic.Areas.Identity.Data;
 using ASP_AIS_Policlinic.Models;
 using ASP_AIS_Policlinic.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Diagnostics;
 
 namespace ASP_AIS_Policlinic.Controllers
@@ -59,6 +61,7 @@ namespace ASP_AIS_Policlinic.Controllers
             //HttpContext.User;
             return View();
         }
+        [Authorize(Roles = "coach")]
         public async Task<IActionResult> IndexForDoctor()
         {
             UserDetailsViewModel viewModel = new UserDetailsViewModel();
@@ -75,7 +78,7 @@ namespace ASP_AIS_Policlinic.Controllers
             return View(viewModel);
         }
 
-
+        [Authorize(Roles = "guest")]
         public async Task<IActionResult> IndexForPatient()
         {
             UserDetailsViewModel viewModel = new UserDetailsViewModel();

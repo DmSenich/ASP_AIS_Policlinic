@@ -9,6 +9,7 @@ using ASP_AIS_Policlinic.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using ASP_AIS_Policlinic.Areas.Identity.Data;
+using System.Numerics;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -53,6 +54,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Diseases/Create
+        [Authorize(Roles = "coach, admin")]
         public async Task<IActionResult> Create(int? diseaseTypeId, int? visitingId)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -107,6 +109,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Diseases/Edit/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int? id, int? diseaseTypeId)
         {
             if (id == null || _context.Diseases == null)
@@ -127,8 +130,12 @@ namespace ASP_AIS_Policlinic.Controllers
             }
             else
             {
-                ViewBag.diseaseTypeId = disease.DiseaseTypeId;
-                ViewBag.diseaseType = disease.DiseaseType.NameDisease;
+                if(disease.DiseaseType != null)
+                {
+                    ViewBag.diseaseTypeId = disease.DiseaseTypeId;
+                    ViewBag.diseaseType = disease.DiseaseType.NameDisease;
+                }
+               
             }
 
             if (disease == null)
@@ -178,7 +185,7 @@ namespace ASP_AIS_Policlinic.Controllers
             return View(disease);
         }
 
-
+        [Authorize(Roles = "coach, admin")]
         public async Task<IActionResult> EditDiseaseType(int? id, int? visitingId)
         {
             if (_context.Diseases == null)
@@ -241,6 +248,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Diseases/Delete/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Diseases == null)
@@ -248,7 +256,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            if (!(await _userManager.IsInRoleAsync(user, "admin")))
             {
                 return new StatusCodeResult(403);
             }
@@ -271,11 +279,15 @@ namespace ASP_AIS_Policlinic.Controllers
         {
             if (_context.Diseases == null)
             {
-                return Problem("Entity set 'AppDBContext.Disease'  is null.");
+                return Problem("Набор сущностей 'AppDBContext.Disease'  пуст.");
             }
             var disease = await _context.Diseases.FindAsync(id);
             if (disease != null)
             {
+                disease.DiseaseType = null;
+                var diseaseType = _context.DiseaseTypes.Include(dt => dt.Diseases).Where(dt => dt.Id == disease.DiseaseTypeId).FirstOrDefault();
+                diseaseType.Diseases.Remove(disease);
+
                 _context.Diseases.Remove(disease);
             }
             

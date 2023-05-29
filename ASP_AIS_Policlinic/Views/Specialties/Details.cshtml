@@ -51,9 +51,11 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Doctors.First().LastName)
+                ФИО
             </th>
-            <th></th>
+            <th>
+
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -61,7 +63,7 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.LastName)
+                    @Html.DisplayFor(modelItem => item.LastName) @Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.Patronymic)
                 </td>
                 <td>
                     <a asp-controller="Doctors" asp-action="Details" asp-route-id="@item.Id">Подробности</a> |

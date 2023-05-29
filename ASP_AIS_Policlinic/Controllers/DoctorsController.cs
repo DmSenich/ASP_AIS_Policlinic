@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using ASP_AIS_Policlinic.Areas.Identity.Data;
 using OfficeOpenXml;
+using System.IO;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -65,7 +66,7 @@ namespace ASP_AIS_Policlinic.Controllers
             viewModel.Specialties = _context.Specialties.Where(sp => sp.Doctors.FirstOrDefault(d => d.Id == id).Id == id);
             return View(viewModel);
         }
-
+        [Authorize(Roles = "coach, admin")]
         public async Task<IActionResult> AddSpecialtyToDoctor(int id)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -107,10 +108,11 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Doctors/Create
+        [Authorize(Roles = "coach, admin")]
         public async Task<IActionResult> Create(bool? fromRecordDiagnosis, bool? forProfile)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            if (!(await _userManager.IsInRoleAsync(user, "coach") && forProfile==true || await _userManager.IsInRoleAsync(user, "admin")))
             {
                 return new StatusCodeResult(403);
             }
@@ -132,7 +134,7 @@ namespace ASP_AIS_Policlinic.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Doctor doctor, IFormFile upload)
+        public async Task<IActionResult> Create(Doctor doctor, IFormFile? upload)
         {
             if (ModelState.IsValid /*&& selectedSpecialties != null*/)
             {
@@ -140,14 +142,22 @@ namespace ASP_AIS_Policlinic.Controllers
                 //{
                 //    doctor.Specialties.Add(sp);
                 //}
-                if(upload != null)
+                string path;
+                if (upload != null)
                 {
-                    string path = "\\Files\\" + upload.FileName;
-                    using(var fileStream = 
+                    path = "\\Files\\" + upload.FileName;
+                    using (var fileStream =
                         new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
                     {
                         await upload.CopyToAsync(fileStream);
                     }
+                    doctor.PathPhoto = path;
+
+                }
+                else if(System.IO.File.Exists(_appEnvironment.WebRootPath + "\\Files\\defaultPhoto.jpeg"))
+                {
+                    path = "\\Files\\defaultPhoto.jpeg";
+
                     doctor.PathPhoto = path;
                 }
 
@@ -170,6 +180,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Doctors/Edit/5
+        [Authorize(Roles = "coach, admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Doctors == null)
@@ -177,7 +188,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            if (!(await _userManager.IsInRoleAsync(user, "coach") && user.ModelId == id || await _userManager.IsInRoleAsync(user, "admin")))
             {
                 return new StatusCodeResult(403);
             }
@@ -189,6 +200,13 @@ namespace ASP_AIS_Policlinic.Controllers
             }
             if (!String.IsNullOrEmpty(doctor.PathPhoto))
             {
+                byte[] photodata = System.IO.File.
+                    ReadAllBytes(_appEnvironment.WebRootPath + doctor.PathPhoto);
+                ViewBag.Photodata = photodata;
+            }
+            else if (System.IO.File.Exists(_appEnvironment.WebRootPath + "\\Files\\defaultPhoto.jpeg"))
+            {
+                doctor.PathPhoto = "\\Files\\defaultPhoto.jpeg";
                 byte[] photodata = System.IO.File.
                     ReadAllBytes(_appEnvironment.WebRootPath + doctor.PathPhoto);
                 ViewBag.Photodata = photodata;
@@ -242,6 +260,10 @@ namespace ASP_AIS_Policlinic.Controllers
                     //}
                     _context.Update(doctor);
                     await _context.SaveChangesAsync();
+
+                    var user = await _userManager.GetUserAsync(User);
+                    user.LastName = doctor.LastName;
+                    user.FirstName = doctor.FirstName;
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -260,6 +282,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Doctors/Delete/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Doctors == null)
@@ -289,11 +312,21 @@ namespace ASP_AIS_Policlinic.Controllers
         {
             if (_context.Doctors == null)
             {
-                return Problem("Entity set 'AppDBContext.Doctors'  is null.");
+                return Problem("Набор сущностей 'AppDBContext.Doctors' пуст.");
+            }
+            if (_context.Visitings.Where(v => v.DoctorId == id).Count() != 0)
+            {
+                return Problem("Существую связанные данные (визиты).");
             }
             var doctor = await _context.Doctors.FindAsync(id);
             if (doctor != null)
             {
+                //doctor.Specialties.Clear();
+                var specialties = _context.Specialties.Include(sp => sp.Doctors).Where(sp => sp.Doctors.Contains(doctor)).ToList();
+                foreach (Specialty specialty in specialties)
+                {
+                    specialty.Doctors.Remove(doctor);
+                }
                 _context.Doctors.Remove(doctor);
             }
             
@@ -335,11 +368,10 @@ namespace ASP_AIS_Policlinic.Controllers
                 {
                     List<Specialty> specialties = doctor.Specialties.ToList();
                     worksheet.Cells[startLine, 1].Value = startLine - 2;
-                    worksheet.Cells[startLine, 2].Value = doctor.Id;
-                    worksheet.Cells[startLine, 3].Value = doctor.LastName;
-                    worksheet.Cells[startLine, 4].Value = doctor.FirstName;
-                    worksheet.Cells[startLine, 5].Value = doctor.Patronymic;
-                    worksheet.Cells[startLine, 6].Value = doctor.WorkExperience;
+                    worksheet.Cells[startLine, 2].Value = doctor.LastName;
+                    worksheet.Cells[startLine, 3].Value = doctor.FirstName;
+                    worksheet.Cells[startLine, 4].Value = doctor.Patronymic;
+                    worksheet.Cells[startLine, 5].Value = doctor.WorkExperience;
                     if(specialties != null)
                     {
                         string[] strSp = new string[specialties.Count];
@@ -349,7 +381,7 @@ namespace ASP_AIS_Policlinic.Controllers
                             strSp[i] = specialty.NameSpecialty;
                             i++;
                         }
-                        worksheet.Cells[startLine, 7].Value = String.Join(", ", strSp);
+                        worksheet.Cells[startLine, 6].Value = String.Join(", ", strSp);
                     }
                     startLine++;
                 }

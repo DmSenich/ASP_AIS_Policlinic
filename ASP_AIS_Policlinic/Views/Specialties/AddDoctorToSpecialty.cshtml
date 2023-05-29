@@ -11,7 +11,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.LastName)
+                ФИО
             </th>
             <th></th>
         </tr>
@@ -21,7 +21,7 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.LastName)
+                    @Html.DisplayFor(modelItem => item.LastName) @Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.Patronymic)
                 </td>
                 <td>
                     @if (item.Specialties.Count(d => d.Id == ViewBag.SpecialtyId) != 0)

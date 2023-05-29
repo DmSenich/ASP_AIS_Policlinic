@@ -77,6 +77,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Visitings/Details/5
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Visitings == null)
@@ -96,16 +97,21 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return NotFound();
             }
+            if(User.IsInRole("guest") && visiting.PatientId != user.ModelId) 
+            {
+                return new StatusCodeResult(403);
+            }
             VisitingDetailsViewModel viewModel = new VisitingDetailsViewModel();
             viewModel.Visiting = visiting;
             viewModel.Diseases = _context.Diseases.Include(d=>d.DiseaseType).Where(d => d.VisitingId == id);
             return View(viewModel);
         }
-
+        [Authorize(Roles = "coach, admin")]
         public async Task<IActionResult> AddDiseaseToVisiting(int id)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            var visiting = _context.Visitings.FirstOrDefault(d => d.Id == id);
+            if (!(await _userManager.IsInRoleAsync(user, "coach") && user.ModelId == visiting.DoctorId || await _userManager.IsInRoleAsync(user, "admin")))
             {
                 return new StatusCodeResult(403);
             }
@@ -125,6 +131,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Visitings/Create
+        [Authorize(Roles = "admin")]
         public IActionResult Create(bool? fromRecordDiagnosis)
         {
             ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "FirstName");
@@ -159,6 +166,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Visitings/Edit/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Visitings == null)
@@ -219,6 +227,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Visitings/Delete/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Visitings == null)
@@ -226,7 +235,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 return NotFound();
             }
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            if (!(await _userManager.IsInRoleAsync(user, "coach") || await _userManager.IsInRoleAsync(user, "admin")))
+            if (!(await _userManager.IsInRoleAsync(user, "admin")))
             {
                 return new StatusCodeResult(403);
             }
@@ -250,7 +259,11 @@ namespace ASP_AIS_Policlinic.Controllers
         {
             if (_context.Visitings == null)
             {
-                return Problem("Entity set 'AppDBContext.Visitings'  is null.");
+                return Problem("Набор сущностей 'AppDBContext.Visitings' пуст.");
+            }
+            if (_context.Diseases.Where(v => v.VisitingId == id).Count() != 0)
+            {
+                return Problem("Существую связанные данные (визиты).");
             }
             var visiting = await _context.Visitings.FindAsync(id);
             if (visiting != null)
@@ -280,6 +293,9 @@ namespace ASP_AIS_Policlinic.Controllers
                 }
 
             }
+            var user = _userManager.GetUserAsync(User).Result;
+            
+
             string path = "/Reports/templates/report_template_of_visitings.xlsx";
             //Путь к файлу с результатом
             string result = "/Reports/report_visitings.xlsx";
@@ -310,25 +326,34 @@ namespace ASP_AIS_Policlinic.Controllers
                 {
                     Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).ToList();
                 }
+                if (User.IsInRole("guest"))
+                {
+                    Visitings = Visitings.Where(v => v.PatientId == user.ModelId).ToList(); 
+                }
+
                 List<Doctor> Doctors = _context.Doctors.Include(d => d.Visitings).ToList();
                 
                 foreach (Doctor doctor in Doctors)
                 {
+                    bool rep = true;
                     if (doctor.Visitings != null)
                     {
-                        worksheet.Cells[startLine, 7].Value = doctor.FirstName;
-                        worksheet.Cells[startLine, 8].Value = doctor.LastName;
-                        worksheet.Cells[startLine, 9].Value = doctor.Patronymic;
                         foreach (Visiting visiting in Visitings)
                         {
                             if (doctor.Visitings.Contains(visiting))
                             {
                                 worksheet.Cells[startLine, 1].Value = startLine - 2;
-                                worksheet.Cells[startLine, 2].Value = visiting.Id;
-                                worksheet.Cells[startLine, 3].Value = visiting.DateVisiting;
-                                worksheet.Cells[startLine, 4].Value = visiting.Patient.FirstName;
-                                worksheet.Cells[startLine, 5].Value = visiting.Patient.LastName;
-                                worksheet.Cells[startLine, 6].Value = visiting.Patient.Patronymic;
+                                worksheet.Cells[startLine, 2].Value = visiting.DateVisiting;
+                                worksheet.Cells[startLine, 3].Value = visiting.Patient.FirstName;
+                                worksheet.Cells[startLine, 4].Value = visiting.Patient.LastName;
+                                worksheet.Cells[startLine, 5].Value = visiting.Patient.Patronymic;
+                                if(rep)
+                                {
+                                    worksheet.Cells[startLine, 6].Value = doctor.FirstName;
+                                    worksheet.Cells[startLine, 7].Value = doctor.LastName;
+                                    worksheet.Cells[startLine, 8].Value = doctor.Patronymic;
+                                    rep = false;
+                                }
                                 startLine++;
                             }
                         }

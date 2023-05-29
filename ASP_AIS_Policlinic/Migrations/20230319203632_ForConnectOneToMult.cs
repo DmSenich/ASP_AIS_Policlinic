@@ -50,7 +50,7 @@ namespace ASP_AIS_Policlinic.Migrations
                 column: "VisitingId",
                 principalTable: "Visitings",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
     }
 }

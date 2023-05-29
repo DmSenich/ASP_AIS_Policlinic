@@ -13,12 +13,11 @@
         <a asp-action="Create">Создать</a>
     </p>
 }
-@if (!User.IsInRole("guest"))
-{
+
     <p>
         <a asp-action="GetReport" asp-route-dates="@ViewBag.DateRange">Создать отчет о визитах</a>
     </p>
-}
+
 <form asp-action="Index">
 <table class="table">
     <thead>

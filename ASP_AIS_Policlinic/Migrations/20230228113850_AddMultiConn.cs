@@ -37,13 +37,13 @@ namespace ASP_AIS_Policlinic.Migrations
                         column: x => x.DoctorsId,
                         principalTable: "Doctors",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_DoctorSpecialty_Specialties_SpecialtiesId",
                         column: x => x.SpecialtiesId,
                         principalTable: "Specialties",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateIndex(

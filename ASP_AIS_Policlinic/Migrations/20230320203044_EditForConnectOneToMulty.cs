@@ -50,7 +50,7 @@ namespace ASP_AIS_Policlinic.Migrations
                 column: "DiseaseTypeId",
                 principalTable: "DiseaseTypes",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
     }
 }

@@ -16,13 +16,13 @@
             @Html.DisplayNameFor(model => model.Doctor)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Doctor.FirstName)
+            @Html.DisplayFor(model => model.Doctor.LastName)  @Html.DisplayFor(model => model.Doctor.FirstName)  @Html.DisplayFor(model => model.Doctor.Patronymic)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Patient)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Patient.Area)
+            @Html.DisplayFor(model => model.Patient.LastName) @Html.DisplayFor(model => model.Patient.FirstName) @Html.DisplayFor(model => model.Patient.Patronymic)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.DateVisiting)

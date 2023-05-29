@@ -163,6 +163,7 @@ namespace ASP_AIS_Policlinic.Areas.Identity.Pages.Account
 
                     //if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     //{
+                    await _signInManager.SignInAsync(user, isPersistent: true);
                     return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                     //}
                     //else

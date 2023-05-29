@@ -37,12 +37,23 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return NotFound();
             }
-            
+            var user = await _userManager.GetUserAsync(User);
+            if (User.IsInRole("guest") && id != user.ModelId)
+            {
+                return new StatusCodeResult(403);
+            }
+
             return RedirectToAction(nameof(ListDiseases), new { id }); 
         }
         public async Task<IActionResult> ListDiseases(int? id, string? dateRange)
         {
             if (id == null || _context.Visitings == null)
+            {
+                return NotFound();
+            }
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (patient == null)
             {
                 return NotFound();
             }
@@ -59,6 +70,12 @@ namespace ASP_AIS_Policlinic.Controllers
             ViewBag.DateRange = dateRange;
             ViewBag.PatientId = id;
 
+            var user = await _userManager.GetUserAsync(User);
+            if (User.IsInRole("guest") && id != user.ModelId)
+            {
+                return new StatusCodeResult(403);
+            }
+            
             if (dates.Count != 0)
             {
                 var diseases = await _context.Diseases.Include(d => d.DiseaseType).Include(d => d.Visiting).Where(d => d.Visiting.PatientId == id && d.Visiting.DateVisiting >= dates[0] && d.Visiting.DateVisiting <= dates[1]).ToListAsync();
@@ -97,10 +114,15 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return NotFound();
             }
-
+            
             var disease = await _context.Diseases
                 .Include(d => d.DiseaseType).Include(d => d.Visiting).Include(d => d.Visiting.Doctor).Include(d => d.Visiting.Patient)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+            if(disease == null || disease.Visiting == null)
+            {
+                return NotFound();
+            }
 
             VisitingDiseaseViewModel model = new VisitingDiseaseViewModel();
             model.Disease = disease;
@@ -108,6 +130,11 @@ namespace ASP_AIS_Policlinic.Controllers
             model.Doctor = disease.Visiting.Doctor;
             model.Patient = disease.Visiting.Patient;
 
+            var user = await _userManager.GetUserAsync(User);
+            if (User.IsInRole("guest") && model.Visiting.PatientId != user.ModelId)
+            {
+                return new StatusCodeResult(403);
+            }
 
             return View(model);
         }
@@ -128,6 +155,8 @@ namespace ASP_AIS_Policlinic.Controllers
                 }
 
             }
+
+            var patient = _context.Patients.FirstOrDefault(x => x.Id == id);
 
             // Путь к файлу с шаблоном
             string path = "/Reports/templates/report_template_of_historyDiseases.xlsx";
@@ -150,21 +179,20 @@ namespace ASP_AIS_Policlinic.Controllers
                 ExcelWorksheet worksheet =
                     excelPackage.Workbook.Worksheets["Diseases"];
                 //получаем списко пользователей и в цикле заполняем лист данными
+                worksheet.Cells[1, 1].Value = "История болезни " + patient.FirstName + patient.LastName + patient.Patronymic;
                 int startLine = 3;
                 List<Disease> Diseases = _context.Diseases.Include(d => d.DiseaseType).ToList();
                 List<Visiting> Visitings;
                 if (dateList.Count > 0)
                 {
                     Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Include(v => v.Diseases).Where(v => v.PatientId == id).Where(v => v.DateVisiting >= dateList[0] && v.DateVisiting <= dateList[1]).ToList();
+                    worksheet.Cells[1, 1].Value = worksheet.Cells[1, 1].Value + "[" + dateList[0] + " : " + dateList[1] +  "]";
                 }
                 else
                 {
                     Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Include(v => v.Diseases).Where(v => v.PatientId == id).ToList();
                 }
                 //worksheet.Cells[startLine, 10].Value = _context.DiseaseTypes.Where(dt => dt.Id == id).First().NameDisease;
-                worksheet.Cells[startLine, 9].Value = _context.Patients.Where(p => p.Id == id).First().LastName;
-                worksheet.Cells[startLine, 10].Value = _context.Patients.Where(p => p.Id == id).First().FirstName;
-                worksheet.Cells[startLine, 11].Value = _context.Patients.Where(p => p.Id == id).First().Patronymic;
                 foreach (Visiting visiting in Visitings)
                 {
                     foreach (Disease disease in Diseases)
@@ -172,14 +200,13 @@ namespace ASP_AIS_Policlinic.Controllers
                         if (visiting.Diseases.Contains(disease))
                         {
                             worksheet.Cells[startLine, 1].Value = startLine - 2;
-                            worksheet.Cells[startLine, 2].Value = disease.Id;
-                            worksheet.Cells[startLine, 3].Value = visiting.DateVisiting;
+                            worksheet.Cells[startLine, 2].Value = visiting.DateVisiting;
 
-                            worksheet.Cells[startLine, 4].Value = visiting.Doctor.LastName;
-                            worksheet.Cells[startLine, 5].Value = visiting.Doctor.FirstName;
-                            worksheet.Cells[startLine, 6].Value = visiting.Doctor.Patronymic;
-                            worksheet.Cells[startLine, 7].Value = disease.DiseaseType.NameDisease;
-                            worksheet.Cells[startLine, 8].Value = disease.Description;
+                            worksheet.Cells[startLine, 3].Value = visiting.Doctor.LastName;
+                            worksheet.Cells[startLine, 4].Value = visiting.Doctor.FirstName;
+                            worksheet.Cells[startLine, 5].Value = visiting.Doctor.Patronymic;
+                            worksheet.Cells[startLine, 6].Value = disease.DiseaseType.NameDisease;
+                            worksheet.Cells[startLine, 7].Value = disease.Description;
                             startLine++;
                         }
                     }

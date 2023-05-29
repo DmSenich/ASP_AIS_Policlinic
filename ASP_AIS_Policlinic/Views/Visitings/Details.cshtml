@@ -85,7 +85,7 @@
                 </td>
                 <td>
                     <a asp-controller="Diseases" asp-action="Details" asp-route-id="@item.Id">Подробности</a> |
-                    @if (User.IsInRole("coach") && ViewBag.DoctorId == Model.Visiting.DoctorId || User.IsInRole("admin"))
+                    @if (@*User.IsInRole("coach") && ViewBag.DoctorId == Model.Visiting.DoctorId ||*@ User.IsInRole("admin"))
                     {
                         <a asp-controller="Diseases" asp-action="Edit" asp-route-id="@item.Id">Редактировать</a> <p>|</p>
                         <a asp-controller="Diseases" asp-action="Delete" asp-route-id="@item.Id">Удалить</a>

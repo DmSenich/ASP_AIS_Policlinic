@@ -1,6 +1,8 @@
 ﻿@model ASP_AIS_Policlinic.Models.Doctor
 @using ASP_AIS_Policlinic.Models;
-
+@using Microsoft.AspNetCore.Identity;
+@using ASP_AIS_Policlinic.Areas.Identity.Data
+@inject UserManager<PoliclinicUser> UserManager
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -16,12 +18,26 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
+                @if (ViewBag.isProfile == true)
+                {
+                    <input asp-for="LastName" class="form-control" readonly value="@((await UserManager.GetUserAsync(User)).LastName)" />
+                }
+                else
+                {
+                    <input asp-for="LastName" class="form-control" />
+                }
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
+                @if (ViewBag.isProfile == true)
+                {
+                    <input asp-for="FirstName" class="form-control" readonly value="@((await UserManager.GetUserAsync(User)).FirstName)" />
+                }
+                else
+                {
+                    <input asp-for="FirstName" class="form-control" />
+                }
                 <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
             <div class="form-group">

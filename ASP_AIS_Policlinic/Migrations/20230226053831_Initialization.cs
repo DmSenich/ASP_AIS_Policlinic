@@ -89,7 +89,7 @@ namespace ASP_AIS_Policlinic.Migrations
                         column: x => x.DiseaseTypeId,
                         principalTable: "DiseaseTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -110,13 +110,13 @@ namespace ASP_AIS_Policlinic.Migrations
                         column: x => x.DoctorId,
                         principalTable: "Doctors",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Visitings_Patients_PatientId",
                         column: x => x.PatientId,
                         principalTable: "Patients",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateIndex(

@@ -9,6 +9,7 @@ using ASP_AIS_Policlinic.Models;
 using Microsoft.AspNetCore.Authorization;
 using ASP_AIS_Policlinic.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
+using System.Numerics;
 
 namespace ASP_AIS_Policlinic.Controllers
 {
@@ -43,6 +44,12 @@ namespace ASP_AIS_Policlinic.Controllers
             if (patient == null)
             {
                 return NotFound();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if(User.IsInRole("guest") && id != user.ModelId)
+            {
+                return new StatusCodeResult(403);
             }
 
             return View(patient);
@@ -90,6 +97,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Patients/Edit/5
+        [Authorize(Roles = "guest, admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Patients == null)
@@ -123,6 +131,10 @@ namespace ASP_AIS_Policlinic.Controllers
                 {
                     _context.Update(patient);
                     await _context.SaveChangesAsync();
+
+                    var user = await _userManager.GetUserAsync(User);
+                    user.LastName = patient.LastName;
+                    user.FirstName = patient.FirstName;
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -141,6 +153,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Patients/Delete/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Patients == null)
@@ -165,7 +178,11 @@ namespace ASP_AIS_Policlinic.Controllers
         {
             if (_context.Patients == null)
             {
-                return Problem("Entity set 'AppDBContext.Patients'  is null.");
+                return Problem("Набор сущностей  'AppDBContext.Patients'  пуст.");
+            }
+            if (_context.Visitings.Where(v => v.PatientId == id).Count() != 0)
+            {
+                return Problem("Существую связанные данные (визиты).");
             }
             var patient = await _context.Patients.FindAsync(id);
             if (patient != null)

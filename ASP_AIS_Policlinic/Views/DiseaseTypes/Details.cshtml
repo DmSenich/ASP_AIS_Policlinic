@@ -55,9 +55,17 @@
                     @Html.DisplayFor(modelItem => item.Description)
                 </td>
                 <td>
-                    <a asp-controller="Diseases" asp-action="Edit" asp-route-id="@item.Id">Редактировать</a> |
-                    <a asp-controller="Diseases" asp-action="Details" asp-route-id="@item.Id">Подробности</a> |
-                    <a asp-controller="Diseases" asp-action="Delete" asp-route-id="@item.Id">Удалить</a>
+                    @if (User.IsInRole("admin"))
+                    {
+                        <a asp-controller="Diseases" asp-action="Edit" asp-route-id="@item.Id">Редактировать</a> <p>|</p>
+                        <a asp-controller="Diseases" asp-action="Details" asp-route-id="@item.Id">Подробности</a> <p>|</p>
+                        <a asp-controller="Diseases" asp-action="Delete" asp-route-id="@item.Id">Удалить</a>
+                    }
+                    else
+                    {
+                         <a asp-controller="Diseases" asp-action="Details" asp-route-id="@item.Id">Подробности</a>
+                    }
+                   
                 </td>
             </tr>
         }

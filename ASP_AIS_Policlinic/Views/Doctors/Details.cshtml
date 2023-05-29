@@ -15,7 +15,7 @@
     <hr />
     @if(ViewBag.Photodata != null)
     {
-        <img class="mt-4 mb-4" width="600" src="data:image/jpeg;base64,@(Convert.ToBase64String(ViewBag.Photodata))"/>
+        <img class="mt-4 mb-4" width="400" src="data:image/jpeg;base64,@(Convert.ToBase64String(ViewBag.Photodata))"/>
     }
 
     <dl class="row">
@@ -93,9 +93,10 @@
                 @if (User.IsInRole("admin") || (User.IsInRole("coach") && Model?.Doctor.Id == (await UserManager.GetUserAsync(User)).ModelId))
                 {
                     <td>
-                        <a asp-controller="Specialties" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-controller="Specialties" asp-action="Details" asp-route-id="@item.Id">Подробности</a> 
                         @if (User.IsInRole("admin"))
                         {
+                            <p>|</p>
                             <a asp-controller="Specialties" asp-action="Edit" asp-route-id="@item.Id">Редактировать</a> <p>|</p>
                             <a asp-controller ="Specialties" asp-action = "Delete" asp-route-id = "@item.Id" > Удалить </a>
                         }

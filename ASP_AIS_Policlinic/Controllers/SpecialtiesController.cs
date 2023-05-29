@@ -55,7 +55,7 @@ namespace ASP_AIS_Policlinic.Controllers
 
             return View(viewModel);
         }
-
+        [Authorize(Roles = "coach, admin")]
         public async Task<IActionResult> AddDoctorToSpecialty(int id)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -90,6 +90,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Specialties/Create
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -117,6 +118,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Specialties/Edit/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Specialties == null)
@@ -173,6 +175,7 @@ namespace ASP_AIS_Policlinic.Controllers
         }
 
         // GET: Specialties/Delete/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Specialties == null)
@@ -202,9 +205,14 @@ namespace ASP_AIS_Policlinic.Controllers
         {
             if (_context.Specialties == null)
             {
-                return Problem("Entity set 'AppDBContext.Specialty'  is null.");
+                return Problem("Набор сущностей 'AppDBContext.Specialty'  пуст.");
             }
+            
             var specialty = await _context.Specialties.FindAsync(id);
+            if (_context.Doctors.Where(d => d.Specialties.Contains(specialty)).Count() != 0)
+            {
+                return Problem("Существуют связанные данные (доктора).");
+            }
             if (specialty != null)
             {
                 _context.Specialties.Remove(specialty);
@@ -226,6 +234,7 @@ namespace ASP_AIS_Policlinic.Controllers
             {
                 return null;
             }
+            var specialty = _context.Specialties.FirstOrDefault(sp => sp.Id == id);
             // Путь к файлу с шаблоном
             string path = "/Reports/templates/report_template_of_specialtyDoctors.xlsx";
             //Путь к файлу с результатом
@@ -247,21 +256,18 @@ namespace ASP_AIS_Policlinic.Controllers
                 ExcelWorksheet worksheet =
                     excelPackage.Workbook.Worksheets["Doctors"];
                 //получаем списко пользователей и в цикле заполняем лист данными
+                worksheet.Cells[1, 1].Value = "Список врачей по специальности " + specialty.NameSpecialty;
                 int startLine = 3;
-                List<Doctor> Doctors = _context.Doctors.Include(d => d.Specialties).ToList();
-                worksheet.Cells[startLine, 7].Value = _context.Specialties.Where(sp => sp.Id == id).First().NameSpecialty;
+                List<Doctor> Doctors = _context.Doctors.Include(d => d.Specialties).Where(d => d.Specialties.Contains(specialty)).ToList();
                 foreach (Doctor doctor in Doctors)
                 {
-                    if(doctor.Specialties.Contains(_context.Specialties.Where(sp => sp.Id == id).First()))
-                    {
                         worksheet.Cells[startLine, 1].Value = startLine - 2;
-                        worksheet.Cells[startLine, 2].Value = doctor.Id;
-                        worksheet.Cells[startLine, 3].Value = doctor.LastName;
-                        worksheet.Cells[startLine, 4].Value = doctor.FirstName;
-                        worksheet.Cells[startLine, 5].Value = doctor.Patronymic;
-                        worksheet.Cells[startLine, 6].Value = doctor.WorkExperience;
+                        worksheet.Cells[startLine, 2].Value = doctor.LastName;
+                        worksheet.Cells[startLine, 3].Value = doctor.FirstName;
+                        worksheet.Cells[startLine, 4].Value = doctor.Patronymic;
+                        worksheet.Cells[startLine, 5].Value = doctor.WorkExperience;
                         startLine++;
-                    }                   
+                 
                 }
                 //созраняем в новое место
                 excelPackage.SaveAs(fr);
@@ -300,6 +306,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 ExcelWorksheet worksheet =
                     excelPackage.Workbook.Worksheets["Doctors"];
                 //получаем списко пользователей и в цикле заполняем лист данными
+                worksheet.Cells[1, 6].Value = "Специальность";
                 int startLine = 3;
                 List<Doctor> Doctors = _context.Doctors.Include(d => d.Specialties).ToList();
                 List<Specialty> Specialties = _context.Specialties.Include(sp => sp.Doctors).ToList();
@@ -313,11 +320,10 @@ namespace ASP_AIS_Policlinic.Controllers
                         if (doctor.Specialties.Contains(specialty))
                         {
                             worksheet.Cells[startLine, 1].Value = startLine - 2;
-                            worksheet.Cells[startLine, 2].Value = doctor.Id;
-                            worksheet.Cells[startLine, 3].Value = doctor.LastName;
-                            worksheet.Cells[startLine, 4].Value = doctor.FirstName;
-                            worksheet.Cells[startLine, 5].Value = doctor.Patronymic;
-                            worksheet.Cells[startLine, 6].Value = doctor.WorkExperience;
+                            worksheet.Cells[startLine, 2].Value = doctor.LastName;
+                            worksheet.Cells[startLine, 3].Value = doctor.FirstName;
+                            worksheet.Cells[startLine, 4].Value = doctor.Patronymic;
+                            worksheet.Cells[startLine, 5].Value = doctor.WorkExperience;
                             startLine++;
                         }
                     }
