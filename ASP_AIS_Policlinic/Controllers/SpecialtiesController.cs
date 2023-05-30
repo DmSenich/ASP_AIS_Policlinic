@@ -314,11 +314,17 @@ namespace ASP_AIS_Policlinic.Controllers
 
                 foreach(Specialty specialty in Specialties)
                 {
-                    worksheet.Cells[startLine, 7].Value = specialty.NameSpecialty;
+                    bool rep = true;
+                    
                     foreach (Doctor doctor in Doctors)
                     {
                         if (doctor.Specialties.Contains(specialty))
                         {
+                            if (rep)
+                            {
+                                worksheet.Cells[startLine, 7].Value = specialty.NameSpecialty;
+                                rep = false;
+                            }
                             worksheet.Cells[startLine, 1].Value = startLine - 2;
                             worksheet.Cells[startLine, 2].Value = doctor.LastName;
                             worksheet.Cells[startLine, 3].Value = doctor.FirstName;

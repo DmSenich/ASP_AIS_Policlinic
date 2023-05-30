@@ -179,7 +179,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 ExcelWorksheet worksheet =
                     excelPackage.Workbook.Worksheets["Diseases"];
                 //получаем списко пользователей и в цикле заполняем лист данными
-                worksheet.Cells[1, 1].Value = "История болезни " + patient.FirstName + patient.LastName + patient.Patronymic;
+                worksheet.Cells[1, 1].Value = "История болезни " + patient.FirstName + " " + patient.LastName + " " + patient.Patronymic;
                 int startLine = 3;
                 List<Disease> Diseases = _context.Diseases.Include(d => d.DiseaseType).ToList();
                 List<Visiting> Visitings;
