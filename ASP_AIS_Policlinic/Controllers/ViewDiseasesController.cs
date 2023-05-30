@@ -186,7 +186,7 @@ namespace ASP_AIS_Policlinic.Controllers
                 if (dateList.Count > 0)
                 {
                     Visitings = _context.Visitings.Include(v => v.Doctor).Include(v => v.Patient).Include(v => v.Diseases).Where(v => v.PatientId == id).Where(v => v.DateVisiting >= dateList[0] && v.DateVisiting <= dateList[1]).ToList();
-                    worksheet.Cells[1, 1].Value = worksheet.Cells[1, 1].Value + "[" + dateList[0] + " : " + dateList[1] +  "]";
+                    worksheet.Cells[1, 1].Value = worksheet.Cells[1, 1].Value + "[" + dateList[0].ToShortDateString() + " : " + dateList[1].ToShortDateString() +  "]";
                 }
                 else
                 {
